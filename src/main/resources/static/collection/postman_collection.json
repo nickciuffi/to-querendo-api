@@ -1,0 +1,120 @@
+{
+	"info": {
+		"_postman_id": "3f612917-ca30-4f0b-8212-f255d41aee42",
+		"name": "hackaton - Simulacao crédito",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "34091744"
+	},
+	"item": [
+		{
+			"name": "realizarSimulacao",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"valorDesejado\": 900.00,\r\n    \"prazo\": 5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8080/simulacao/realizar"
+			},
+			"response": []
+		},
+		{
+			"name": "consultarSimulacoes",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/simulacao?pagina=1&qtdRegistrosPagina=5&mostrarParcelas=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"simulacao"
+					],
+					"query": [
+						{
+							"key": "pagina",
+							"value": "1"
+						},
+						{
+							"key": "qtdRegistrosPagina",
+							"value": "5"
+						},
+						{
+							"key": "mostrarParcelas",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "consultarSimulacoesPorDataEProd",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/simulacao/prod-data?codigoProduto=1&dataReferencia=23-08-2026&mostrarParcelas=0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"simulacao",
+						"prod-data"
+					],
+					"query": [
+						{
+							"key": "codigoProduto",
+							"value": "1"
+						},
+						{
+							"key": "dataReferencia",
+							"value": "23-08-2026"
+						},
+						{
+							"key": "mostrarParcelas",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "consultarTelemetriaPorData",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/telemetria?dataReferencia=24-08-2025",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"telemetria"
+					],
+					"query": [
+						{
+							"key": "dataReferencia",
+							"value": "24-08-2025"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
