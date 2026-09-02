@@ -20,6 +20,9 @@ public class Usuario {
     @Column(nullable = false)
     private String nome;
 
+    @Column(nullable = false)
+    private String senha;
+
     private String telefone;
 
     @Column(unique = true, length = 11)
@@ -41,4 +44,15 @@ public class Usuario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
+
+    public void setCategoriaId(Long categoriaId) {
+        if (categoriaId == null) {
+            this.categoria = null;
+            return;
+        }
+
+        Categoria categoriaReferencia = new Categoria();
+        categoriaReferencia.setId(categoriaId);
+        this.categoria = categoriaReferencia;
+    }
 }

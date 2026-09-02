@@ -1,9 +1,10 @@
 package br.com.toquerendo.controller;
 
 import br.com.toquerendo.dto.ApiResponse;
-import br.com.toquerendo.dto.output.ProdutoOutputDto;
-import br.com.toquerendo.entity.ProdutoBase;
-import br.com.toquerendo.repository.ProdutoBaseRepository;
+import br.com.toquerendo.dto.input.CriarProdutoBaseInputDto;
+import br.com.toquerendo.dto.output.ProdutoBaseOutputDto;
+import br.com.toquerendo.service.implementation.ProdutoBaseServiceImpl;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,40 +13,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/produto")
 @AllArgsConstructor
 public class ProdutoController {
 
-    private ProdutoBaseRepository produtoBaseRepository;
+    private final ProdutoBaseServiceImpl produtoBaseService;
 
     @GetMapping("")
-    ResponseEntity<ApiResponse<List<ProdutoOutputDto>>> consultarProdutosDisponiveis(){
-        List<ProdutoBase> prodsEnt = produtoBaseRepository.findAll();
-        List<ProdutoOutputDto> prodsOutput = new ArrayList<>();
-        for(ProdutoBase prodEnt : prodsEnt) {
-            ProdutoOutputDto prodOutput = ProdutoOutputDto
-                    .builder()
-                    .nomeProduto(prodEnt.getNome())
-                    .preco("R$" + prodEnt.getPrecoMinimo())
-                    .build();
-            prodsOutput.add(prodOutput);
-        }
-        return ResponseEntity.ok().body(new ApiResponse(prodsOutput, "Produtos consultados com sucesso!"));
+    public ResponseEntity<ApiResponse<List<ProdutoBaseOutputDto>>> consultarProdutosDisponiveis() {
+        List<ProdutoBaseOutputDto> prodsOutput = produtoBaseService.consultarProdutosBaseAtivos();
+        return ResponseEntity.ok().body(new ApiResponse<>(prodsOutput, "Produtos consultados com sucesso!"));
     }
 
     @PostMapping("")
-    ResponseEntity<ApiResponse<ProdutoOutputDto>> criarProdutoBase(@RequestBody ProdutoBase produtoBase) {
-        ProdutoBase prodSalvo = produtoBaseRepository.save(produtoBase);
-        ProdutoOutputDto prodOutput = ProdutoOutputDto
-                .builder()
-                .nomeProduto(prodSalvo.getNome())
-                .preco("R$" + prodSalvo.getPrecoMinimo())
-                .build();
-        return ResponseEntity.ok().body(new ApiResponse(prodOutput, "Produto criado com sucesso!"));
+    public ResponseEntity<ApiResponse<ProdutoBaseOutputDto>> criarProdutoBase(@RequestBody @Valid CriarProdutoBaseInputDto produtoBase) {
+        ProdutoBaseOutputDto output = produtoBaseService.criarProdutoBase(produtoBase);
+
+        return ResponseEntity.ok().body(new ApiResponse<>(output, "Produto criado com sucesso!"));
     }
 }
