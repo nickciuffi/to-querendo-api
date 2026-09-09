@@ -1,0 +1,2 @@
+ALTER TABLE produtos_base
+    ADD COLUMN esta_ativo BOOLEAN NOT NULL DEFAULT FALSE;

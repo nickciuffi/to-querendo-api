@@ -24,4 +24,7 @@ public class ProdutoBase {
 
     @Column(name = "preco_minimo", precision = 10, scale = 2)
     private BigDecimal precoMinimo;
+
+    @Column(name = "esta_ativo")
+    private Boolean estaAtivo;
 }
