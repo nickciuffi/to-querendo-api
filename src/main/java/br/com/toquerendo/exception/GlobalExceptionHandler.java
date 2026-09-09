@@ -4,6 +4,7 @@ import br.com.toquerendo.dto.ApiResponse;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,6 +32,11 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
     }
 
+    @ExceptionHandler(CriacaoVendedorException.class)
+    public ResponseEntity<ApiResponse<Object>> handleCriacaoVendedorException(CriacaoVendedorException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage()));
+    }
+
     @ExceptionHandler(TelemetriaNaoEncontradaException.class)
     public ResponseEntity<ApiResponse<Object>> handleProdutoNaoEncontradoException(TelemetriaNaoEncontradaException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
@@ -49,6 +55,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EnviarEventSenderException.class)
     public ResponseEntity<ApiResponse<Object>> handleEnviarEventSenderException(EnviarEventSenderException e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<ApiResponse<Object>> handleCredenciaisInvalidasException(CredenciaisInvalidasException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(EmailJaCadastradoException.class)
+    public ResponseEntity<ApiResponse<Object>> handleEmailJaCadastradoException(EmailJaCadastradoException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(CpfJaCadastradoException.class)
+    public ResponseEntity<ApiResponse<Object>> handleCpfJaCadastradoException(CpfJaCadastradoException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(UsuarioNaoAutorizadoException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUsuarioNaoAutorizadoException(UsuarioNaoAutorizadoException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(VendedorJaCadastradoException.class)
+    public ResponseEntity<ApiResponse<Object>> handleVendedorJaCadastradoException(VendedorJaCadastradoException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -80,6 +111,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Erro interno do servidor."));
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>("Endpoint somente disponível para usuários autorizados."));
+    }
+
+    @ExceptionHandler(RuntimeApiException.class)
+    public ResponseEntity<ApiResponse<Object>> handleRuntimeApiException(RuntimeApiException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage()));
     }
 
 }
