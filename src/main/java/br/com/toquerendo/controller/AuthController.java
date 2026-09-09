@@ -34,7 +34,7 @@ public class AuthController {
             throw new CredenciaisInvalidasException();
         }
 
-        String token = jwtService.gerarToken(usuario.getEmail());
+        String token = jwtService.gerarToken(usuario.getEmail(), usuario.getCategoria().getId());
         LoginResponseDto response = LoginResponseDto.builder()
                 .token(token)
                 .tipo("Bearer")

@@ -45,7 +45,7 @@ public class Usuario {
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
 
-    public void setCategoriaId(Long categoriaId) {
+    public void setCategoriaId(Integer categoriaId) {
         if (categoriaId == null) {
             this.categoria = null;
             return;
