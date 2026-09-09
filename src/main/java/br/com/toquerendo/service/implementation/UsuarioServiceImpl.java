@@ -49,27 +49,21 @@ public class UsuarioServiceImpl {
         return UsuarioOutputDto.fromEntity(usuarioSalvo);
     }
 
-    public UsuarioOutputDto editarUsuario(AtualizarUsuarioRequestDto atualizarUsuarioRequest) {
+    public UsuarioOutputDto editarUsuario(AtualizarUsuarioRequestDto req) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || authentication.getName() == null
-                || !authentication.getName().equalsIgnoreCase(atualizarUsuarioRequest.getEmail())) {
+        if (authentication == null || authentication.getName() == null) {
             throw new UsuarioNaoAutorizadoException();
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(atualizarUsuarioRequest.getEmail())
+        String email = authentication.getName();
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
-        usuario.setNome(atualizarUsuarioRequest.getNome());
-        usuario.setTelefone(atualizarUsuarioRequest.getTelefone());
-
-        if (atualizarUsuarioRequest.getUrlFoto() != null) {
-            usuario.setUrlFoto(atualizarUsuarioRequest.getUrlFoto());
-        }
-
-        if (atualizarUsuarioRequest.getSenha() != null && !atualizarUsuarioRequest.getSenha().isBlank()) {
-            usuario.setSenha(passwordEncoder.encode(atualizarUsuarioRequest.getSenha()));
-        }
+        usuario.setNome(req.getNome() != null ? req.getNome() : usuario.getNome());
+        usuario.setTelefone(req.getTelefone() != null ? req.getTelefone() : usuario.getTelefone());
+        usuario.setCpf(req.getCpf() != null ? req.getCpf() : usuario.getCpf());
+        usuario.setUrlFoto(req.getUrlFoto() != null ? req.getUrlFoto() : usuario.getUrlFoto());
 
         return UsuarioOutputDto.fromEntity(usuarioRepository.save(usuario));
     }

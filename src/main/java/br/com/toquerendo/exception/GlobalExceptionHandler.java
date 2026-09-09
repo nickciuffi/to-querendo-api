@@ -32,6 +32,11 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
     }
 
+    @ExceptionHandler(CriacaoVendedorException.class)
+    public ResponseEntity<ApiResponse<Object>> handleCriacaoVendedorException(CriacaoVendedorException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage()));
+    }
+
     @ExceptionHandler(TelemetriaNaoEncontradaException.class)
     public ResponseEntity<ApiResponse<Object>> handleProdutoNaoEncontradoException(TelemetriaNaoEncontradaException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
@@ -70,6 +75,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UsuarioNaoAutorizadoException.class)
     public ResponseEntity<ApiResponse<Object>> handleUsuarioNaoAutorizadoException(UsuarioNaoAutorizadoException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(VendedorJaCadastradoException.class)
+    public ResponseEntity<ApiResponse<Object>> handleVendedorJaCadastradoException(VendedorJaCadastradoException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
