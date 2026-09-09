@@ -1,5 +1,6 @@
 package br.com.toquerendo.security;
 
+import br.com.toquerendo.dto.ApiUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -23,11 +24,12 @@ public class JwtService {
         this.expiracaoMs = expiracaoMs;
     }
 
-    public String gerarToken(String email) {
+    public String gerarToken(String email, Integer categoria) {
         Date agora = new Date();
         Date expiracao = new Date(agora.getTime() + expiracaoMs);
         return Jwts.builder()
                 .subject(email)
+                .claim("categoria", categoria)
                 .issuedAt(agora)
                 .expiration(expiracao)
                 .signWith(chave)
@@ -38,14 +40,23 @@ public class JwtService {
         return expiracaoMs;
     }
 
-    public Optional<String> validarTokenEExtrairEmail(String token) {
+    public Optional<ApiUser> validarTokenEExtrairEmail(String token) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(chave)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-            return Optional.of(claims.getSubject());
+
+            Integer categoria = claims.get("categoria", Integer.class);
+            if (categoria == null) {
+                return Optional.empty();
+            }
+
+            ApiUser apiUser = new ApiUser();
+            apiUser.setEmail(claims.getSubject());
+            apiUser.setCategoria(categoria);
+            return Optional.of(apiUser);
         } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }

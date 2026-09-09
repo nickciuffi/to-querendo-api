@@ -20,10 +20,8 @@ public class CadastroUsuarioRequestDto {
     @Size(min = 6, message = "senha deve ter no mínimo 6 caracteres")
     private String senha;
 
-    @NotBlank(message = "telefone é obrigatório")
     private String telefone;
 
-    @NotBlank(message = "cpf é obrigatório")
     @Pattern(regexp = "\\d{11}", message = "cpf deve conter 11 dígitos numéricos")
     private String cpf;
 }
