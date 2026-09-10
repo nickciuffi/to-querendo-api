@@ -27,6 +27,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
     }
 
+    @ExceptionHandler(PraiaNaoEncontradaException.class)
+    public ResponseEntity<ApiResponse<Object>> handlePraiaNaoEncontradaException(PraiaNaoEncontradaException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
+    }
+
     @ExceptionHandler(NenhumaSimulacaoEncontradaException.class)
     public ResponseEntity<ApiResponse<Object>> handleProdutoNaoEncontradoException(NenhumaSimulacaoEncontradaException e) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));

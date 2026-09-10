@@ -13,10 +13,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/vendedor")
@@ -59,5 +56,11 @@ public class VendedorController {
     ResponseEntity<ApiResponse<VendedorOutputDto>> cadastrarVendedor(@Valid @RequestBody CriarVendedorRequestDto criarVendedorRequest) {
         VendedorOutputDto output = vendedorService.cadastrarVendedor(criarVendedorRequest);
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Vendedor cadastrado com sucesso!"));
+    }
+
+    @GetMapping("/meus-dados")
+    ResponseEntity<ApiResponse<VendedorOutputDto>> obterDadosVendedor() {
+        VendedorOutputDto output = vendedorService.obterDadosVendedor();
+        return ResponseEntity.ok().body(new ApiResponse<>(output, "Dados do vendedor obtidos com sucesso!"));
     }
 }

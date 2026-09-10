@@ -89,4 +89,26 @@ public class UsuarioController {
         UsuarioOutputDto output = usuarioService.editarUsuario(atualizarUsuarioRequest);
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Dados do usuário atualizados com sucesso!"));
     }
+
+    @GetMapping("/meus-dados")
+    @Operation(
+            summary = "Consultar usuário autenticado",
+            description = "Retorna os dados cadastrais do usuário autenticado, identificado pelo email presente no token JWT."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Dados do usuário consultados com sucesso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token ausente, inválido ou expirado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    ResponseEntity<ApiResponse<UsuarioOutputDto>> consultarUsuarioAutenticado() {
+        UsuarioOutputDto output = usuarioService.consultarUsuarioAutenticado();
+        return ResponseEntity.ok().body(new ApiResponse<>(output, "Dados do usuário consultados com sucesso!"));
+    }
 }

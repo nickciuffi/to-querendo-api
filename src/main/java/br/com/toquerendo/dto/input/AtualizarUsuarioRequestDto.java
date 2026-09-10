@@ -20,4 +20,7 @@ public class AtualizarUsuarioRequestDto {
 
     @Schema(description = "URL da foto de perfil do usuário", example = "https://exemplo.com/foto.jpg")
     private String urlFoto;
+
+    @Schema(description = "ID da praia a qual o usuário está associado", example = "1")
+    private Long idPraia;
 }
