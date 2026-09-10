@@ -10,7 +10,7 @@ import java.util.List;
 public enum CategoriaUsuarioEnum {
 
     TURISTA(1, "Turista", List.of("ROLE_TURISTA")),
-    VENDEDOR(2, "Vendedor", List.of("ROLE_VENDEDOR")),
+    VENDEDOR(2, "Vendedor", List.of("ROLE_TURISTA", "ROLE_VENDEDOR")),
     ADMINISTRADOR(3, "Administrador", List.of("ROLE_ADMIN"));
 
     private Integer id;

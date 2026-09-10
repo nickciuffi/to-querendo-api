@@ -23,11 +23,11 @@ public class ProdutoEspecifico {
     @Column(name = "url_foto")
     private String urlFoto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_produto_base", nullable = false)
     private ProdutoBase produtoBase;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_vendedor", nullable = false)
     private Vendedor vendedor;
 

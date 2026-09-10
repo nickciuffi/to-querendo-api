@@ -7,9 +7,12 @@ import br.com.toquerendo.entity.Vendedor;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
 import br.com.toquerendo.exception.CriacaoVendedorException;
 import br.com.toquerendo.exception.VendedorJaCadastradoException;
+import br.com.toquerendo.repository.ProdutoEspecificoRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
 import br.com.toquerendo.repository.VendedorRepository;
+import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
+import org.apache.catalina.security.SecurityUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +26,10 @@ public class VendedorServiceImpl {
 
     private UsuarioRepository usuarioRepository;
 
+    private ProdutoEspecificoRepository produtoEspecificoRepository;
+
     public VendedorOutputDto cadastrarVendedor(CriarVendedorRequestDto criarVendedorRequest) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        String email = SecurityUtils.getEmailUsuarioLogado();
 
         if (vendedorRepository.existsByUsuarioEmail(email)) {
             throw new VendedorJaCadastradoException();
@@ -46,6 +51,21 @@ public class VendedorServiceImpl {
         usuarioRepository.save(usuario);
 
         return VendedorOutputDto.fromEntity(vendedorSalvo);
+    }
+
+    public VendedorOutputDto obterDadosVendedor() {
+        String email = SecurityUtils.getEmailUsuarioLogado();
+        Vendedor vendedorEnt = vendedorRepository.findByUsuarioEmail(email)
+                .orElseThrow(() -> new RuntimeException("Vendedor não encontrado."));
+        Usuario usuarioEnt = vendedorEnt.getUsuario();
+
+        VendedorOutputDto vendedor = VendedorOutputDto.fromEntity(vendedorEnt);
+
+        vendedor.setPraiaAtual(usuarioEnt.getPraia() != null ? usuarioEnt.getPraia().getNome() : "Sem praia vinculada");
+        vendedor.setQtdProdutosAtivos(produtoEspecificoRepository.countByVendedorIdAndProdutoAtivoTrue(vendedorEnt.getId()));
+        vendedor.setQtdProdutos(produtoEspecificoRepository.countByVendedorId(vendedorEnt.getId()));
+
+        return vendedor;
     }
 
     private void verificarSeUsuarioPodeSerVendedor(Usuario usuario) {
