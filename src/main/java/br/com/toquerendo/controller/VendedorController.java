@@ -61,6 +61,29 @@ public class VendedorController {
 
     @GetMapping("/meus-dados")
     @VendedorOnly
+    @Operation(
+            summary = "Consultar dados do vendedor autenticado",
+            description = "Retorna os dados cadastrais e as métricas (produtos ativos, praia atual) do vendedor "
+                    + "autenticado, identificado pelo email presente no token JWT. Restrito a usuários com a role de vendedor."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Dados do vendedor obtidos com sucesso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token ausente, inválido ou expirado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado não possui a role de vendedor",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
     ResponseEntity<ApiResponse<VendedorOutputDto>> obterDadosVendedor() {
         VendedorOutputDto output = vendedorService.obterDadosVendedor();
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Dados do vendedor obtidos com sucesso!"));

@@ -64,7 +64,7 @@ public class ProdutoEspecificoServiceImpl {
             throw new ProdutoNaoPertenceAoVendedorException();
         }
 
-        if(input.getPreco().compareTo(produtoEspecifico.getProdutoBase().getPrecoMinimo()) < 0){
+        if (input.getPreco() != null && input.getPreco().compareTo(produtoEspecifico.getProdutoBase().getPrecoMinimo()) < 0) {
             throw new RuntimeApiException("O preço do produto específico não pode ser menor que o preço mínimo do produto base.");
         }
 
