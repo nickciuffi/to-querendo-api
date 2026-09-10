@@ -3,6 +3,7 @@ package br.com.toquerendo.controller;
 import br.com.toquerendo.dto.ApiResponse;
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
+import br.com.toquerendo.security.annotation.VendedorOnly;
 import br.com.toquerendo.service.implementation.VendedorServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -59,6 +60,7 @@ public class VendedorController {
     }
 
     @GetMapping("/meus-dados")
+    @VendedorOnly
     ResponseEntity<ApiResponse<VendedorOutputDto>> obterDadosVendedor() {
         VendedorOutputDto output = vendedorService.obterDadosVendedor();
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Dados do vendedor obtidos com sucesso!"));
