@@ -28,6 +28,12 @@ public class UsuarioOutputDto {
     @Schema(description = "Indica se a conta do usuário está ativa", example = "true")
     private Boolean contaAtiva;
 
+    @Schema(description = "Praia atual do usuário", example = "Praia do Forte")
+    private String praiaAtual;
+
+    @Schema(description = "Categoria do usuário", example = "Vendedor")
+    private String categoria;
+
     public static UsuarioOutputDto fromEntity(Usuario usuario) {
         return UsuarioOutputDto.builder()
                 .email(usuario.getEmail())

@@ -31,7 +31,7 @@ public class Usuario {
     @Column(name = "url_foto")
     private String urlFoto;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_praia")
     private Praia praia;
 
@@ -41,7 +41,7 @@ public class Usuario {
     @Column(name = "conta_ativa", nullable = false)
     private Boolean contaAtiva;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_categoria")
     private Categoria categoria;
 
@@ -54,5 +54,16 @@ public class Usuario {
         Categoria categoriaReferencia = new Categoria();
         categoriaReferencia.setId(categoriaId);
         this.categoria = categoriaReferencia;
+    }
+
+    public void setPraiaId(Long praiaId) {
+        if (praiaId == null) {
+            this.praia = null;
+            return;
+        }
+
+        Praia praiaReferencia = new Praia();
+        praiaReferencia.setId(praiaId);
+        this.praia = praiaReferencia;
     }
 }

@@ -26,6 +26,12 @@ public class VendedorOutputDto {
     @Schema(description = "Nome do usuário associado ao vendedor", example = "João da Silva")
     private String usuarioNome;
 
+    @Schema(description = "Quantidade de produtos disponíveis para venda pelo vendedor", example = "10")
+    private Integer qtdProdutos;
+
+    @Schema(description = "Praia onde o vendedor está ativo", example = "Praia do Forte")
+    private String praiaAtual;
+
     public static VendedorOutputDto fromEntity(Vendedor vendedor) {
         return VendedorOutputDto.builder()
                 .id(vendedor.getId())
