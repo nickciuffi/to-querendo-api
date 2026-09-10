@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/vendedor")
 @AllArgsConstructor
-@Tag(name = "Vendedores", description = "Upgrade de usuários para a categoria de vendedor")
+@Tag(name = "Vendedores", description = "gestão de usuários")
 public class VendedorController {
 
     private VendedorServiceImpl vendedorService;

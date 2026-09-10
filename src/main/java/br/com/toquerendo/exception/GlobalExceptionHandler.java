@@ -82,6 +82,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(e.getMessage()));
     }
 
+    @ExceptionHandler(ProdutoNaoPertenceAoVendedorException.class)
+    public ResponseEntity<ApiResponse<Object>> handleProdutoNaoPertenceAoVendedorException(ProdutoNaoPertenceAoVendedorException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(e.getMessage()));
+    }
+
     @ExceptionHandler(VendedorJaCadastradoException.class)
     public ResponseEntity<ApiResponse<Object>> handleVendedorJaCadastradoException(VendedorJaCadastradoException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
