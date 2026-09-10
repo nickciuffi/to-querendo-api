@@ -26,8 +26,11 @@ public class VendedorOutputDto {
     @Schema(description = "Nome do usuário associado ao vendedor", example = "João da Silva")
     private String usuarioNome;
 
-    @Schema(description = "Quantidade de produtos disponíveis para venda pelo vendedor", example = "10")
+    @Schema(description = "Quantidade de produtos do vendedor", example = "10")
     private Integer qtdProdutos;
+
+    @Schema(description = "Quantidade de produtos ativos do vendedor", example = "10")
+    private Integer qtdProdutosAtivos;
 
     @Schema(description = "Praia onde o vendedor está ativo", example = "Praia do Forte")
     private String praiaAtual;

@@ -30,8 +30,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/produto-base")
 @AllArgsConstructor
-@Tag(name = "Produtos", description = "Consulta e gestão dos produtos base oferecidos na plataforma")
-public class ProdutoController {
+@Tag(name = "Produtos Base", description = "Consulta e gestão dos produtos base oferecidos na plataforma")
+public class ProdutoBaseController {
 
     private final ProdutoBaseServiceImpl produtoBaseService;
 

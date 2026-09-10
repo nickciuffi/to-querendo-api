@@ -53,7 +53,7 @@ public class VendedorServiceImpl {
         return VendedorOutputDto.fromEntity(vendedorSalvo);
     }
 
-    public VendedorOutputDto consultarVendedorLogado() {
+    public VendedorOutputDto obterDadosVendedor() {
         String email = SecurityUtils.getEmailUsuarioLogado();
         Vendedor vendedorEnt = vendedorRepository.findByUsuarioEmail(email)
                 .orElseThrow(() -> new RuntimeException("Vendedor não encontrado."));
@@ -62,7 +62,8 @@ public class VendedorServiceImpl {
         VendedorOutputDto vendedor = VendedorOutputDto.fromEntity(vendedorEnt);
 
         vendedor.setPraiaAtual(usuarioEnt.getPraia() != null ? usuarioEnt.getPraia().getNome() : "Sem praia vinculada");
-        vendedor.setQtdProdutos(produtoEspecificoRepository.countByIdVendedor(vendedorEnt.getId()));
+        vendedor.setQtdProdutosAtivos(produtoEspecificoRepository.countByVendedorIdAndProdutoAtivoTrue(vendedorEnt.getId()));
+        vendedor.setQtdProdutos(produtoEspecificoRepository.countByVendedorId(vendedorEnt.getId()));
 
         return vendedor;
     }
