@@ -16,8 +16,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,6 +78,29 @@ class IntencaoCompraControllerSecurityTest {
         mockMvc.perform(post("/intencao-compra")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(criarInputValido())))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "VENDEDOR")
+    void consultarBanhistasComIntencaoDeCompra_comRoleVendedor_deveSerPermitido() throws Exception {
+        when(intencaoCompraService.consultarBanhistasComIntencaoDeCompra()).thenReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/intencao-compra/banhistas"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TURISTA")
+    void consultarBanhistasComIntencaoDeCompra_comRoleTuristaSemVendedor_deveSerNegado() throws Exception {
+        mockMvc.perform(get("/intencao-compra/banhistas"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void consultarBanhistasComIntencaoDeCompra_comRoleAdmin_deveSerNegado() throws Exception {
+        mockMvc.perform(get("/intencao-compra/banhistas"))
                 .andExpect(status().isForbidden());
     }
 

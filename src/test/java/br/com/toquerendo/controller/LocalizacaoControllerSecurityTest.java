@@ -17,12 +17,9 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -83,27 +80,6 @@ class LocalizacaoControllerSecurityTest {
         mockMvc.perform(put("/localizacao")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(criarInputValido())))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(roles = "TURISTA")
-    void consultarLocalizacaoVendedores_comRoleTurista_deveSerPermitido() throws Exception {
-        when(localizacaoService.consultarLocalizacaoVendedores(anyLong(), anyLong()))
-                .thenReturn(Collections.emptyList());
-
-        mockMvc.perform(get("/localizacao/vendedores")
-                        .param("idProdutoBase", "10")
-                        .param("idPraia", "3"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    void consultarLocalizacaoVendedores_comRoleAdmin_deveSerNegado() throws Exception {
-        mockMvc.perform(get("/localizacao/vendedores")
-                        .param("idProdutoBase", "10")
-                        .param("idPraia", "3"))
                 .andExpect(status().isForbidden());
     }
 
