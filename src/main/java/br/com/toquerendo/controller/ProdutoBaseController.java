@@ -16,14 +16,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -52,8 +45,8 @@ public class ProdutoBaseController {
                             schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    public ResponseEntity<ApiResponse<List<ProdutoBaseOutputDto>>> consultarProdutosDisponiveis() {
-        List<ProdutoBaseOutputDto> prodsOutput = produtoBaseService.consultarProdutosBaseAtivos();
+    public ResponseEntity<ApiResponse<List<ProdutoBaseOutputDto>>> consultarProdutosDisponiveis(@RequestParam(required = false) Integer idPraia) {
+        List<ProdutoBaseOutputDto> prodsOutput = produtoBaseService.consultarProdutosBaseAtivos(idPraia);
         return ResponseEntity.ok().body(new ApiResponse<>(prodsOutput, "Produtos consultados com sucesso!"));
     }
 
