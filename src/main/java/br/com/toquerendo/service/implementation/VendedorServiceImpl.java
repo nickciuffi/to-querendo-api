@@ -1,21 +1,24 @@
 package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
+import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
+import br.com.toquerendo.entity.Localizacao;
 import br.com.toquerendo.entity.Usuario;
 import br.com.toquerendo.entity.Vendedor;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
 import br.com.toquerendo.exception.CriacaoVendedorException;
+import br.com.toquerendo.exception.PraiaNaoEncontradaException;
+import br.com.toquerendo.exception.ProdutoNaoEncontradoException;
 import br.com.toquerendo.exception.VendedorJaCadastradoException;
-import br.com.toquerendo.repository.ProdutoEspecificoRepository;
-import br.com.toquerendo.repository.UsuarioRepository;
-import br.com.toquerendo.repository.VendedorRepository;
+import br.com.toquerendo.repository.*;
 import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.apache.catalina.security.SecurityUtil;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -27,6 +30,12 @@ public class VendedorServiceImpl {
     private UsuarioRepository usuarioRepository;
 
     private ProdutoEspecificoRepository produtoEspecificoRepository;
+
+    private ProdutoBaseRepository produtoBaseRepository;
+
+    private PraiaRepository praiaRepository;
+
+    private LocalizacaoRepository localizacaoRepository;
 
     public VendedorOutputDto cadastrarVendedor(CriarVendedorRequestDto criarVendedorRequest) {
         String email = SecurityUtils.getEmailUsuarioLogado();
@@ -66,6 +75,23 @@ public class VendedorServiceImpl {
         vendedor.setQtdProdutos(produtoEspecificoRepository.countByVendedorId(vendedorEnt.getId()));
 
         return vendedor;
+    }
+
+    public List<VendedorLocalizacaoOutputDto> consultarLocalizacaoVendedores(Long idProdutoBase, Long idPraia) {
+        produtoBaseRepository.findByIdAndEstaAtivoTrue(idProdutoBase)
+                .orElseThrow(ProdutoNaoEncontradoException::new);
+
+        praiaRepository.findById(idPraia)
+                .orElseThrow(PraiaNaoEncontradaException::new);
+
+        List<Vendedor> vendedores = vendedorRepository.findAllVendedoresOnlinePorProdutoBaseEPraia(idProdutoBase, idPraia);
+        return vendedores.stream()
+                .map(vendedor -> {
+                    Usuario usuario = vendedor.getUsuario();
+                    Localizacao localizacao = localizacaoRepository.findById(usuario.getId()).orElse(null);
+                    return VendedorLocalizacaoOutputDto.fromEntities(vendedor, localizacao);
+                })
+                .toList();
     }
 
     private void verificarSeUsuarioPodeSerVendedor(Usuario usuario) {

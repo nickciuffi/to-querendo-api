@@ -2,10 +2,13 @@ package br.com.toquerendo.controller;
 
 import br.com.toquerendo.dto.ApiResponse;
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
+import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
+import br.com.toquerendo.security.annotation.TuristaOnly;
 import br.com.toquerendo.security.annotation.VendedorOnly;
 import br.com.toquerendo.service.implementation.VendedorServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,6 +18,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/vendedor")
@@ -87,5 +92,45 @@ public class VendedorController {
     ResponseEntity<ApiResponse<VendedorOutputDto>> obterDadosVendedor() {
         VendedorOutputDto output = vendedorService.obterDadosVendedor();
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Dados do vendedor obtidos com sucesso!"));
+    }
+
+    @GetMapping("/localizacao")
+    @TuristaOnly
+    @Operation(
+            summary = "Consultar localização dos vendedores online de um produto base em uma praia",
+            description = "Retorna a localização atual de todos os vendedores online com produtos ativos do produto base "
+                    + "informado, filtrados pela praia informada, permitindo acompanhar múltiplos vendedores do mesmo "
+                    + "produto ao mesmo tempo. Restrito a usuários com a role de turista ou vendedor."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Localizações consultadas com sucesso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token ausente, inválido ou expirado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado não possui a role de turista ou vendedor",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Produto base ou praia não encontrados",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    public ResponseEntity<ApiResponse<List<VendedorLocalizacaoOutputDto>>> consultarLocalizacaoVendedores(
+            @Parameter(description = "Identificador do produto base", required = true) @RequestParam Long idProdutoBase,
+            @Parameter(description = "Identificador da praia", required = true) @RequestParam Long idPraia) {
+        List<VendedorLocalizacaoOutputDto> vendedores =
+                vendedorService.consultarLocalizacaoVendedores(idProdutoBase, idPraia);
+        return ResponseEntity.ok().body(new ApiResponse<>(vendedores, "Localizações consultadas com sucesso!"));
     }
 }
