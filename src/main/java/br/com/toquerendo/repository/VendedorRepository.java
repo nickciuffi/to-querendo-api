@@ -1,6 +1,5 @@
 package br.com.toquerendo.repository;
 
-import br.com.toquerendo.entity.ProdutoEspecifico;
 import br.com.toquerendo.entity.Vendedor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

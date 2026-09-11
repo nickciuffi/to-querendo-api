@@ -22,7 +22,13 @@ public class ProdutoBaseServiceImpl {
         return ProdutoBaseOutputDto.fromEntity(produtoBase);
     }
 
-    public List<ProdutoBaseOutputDto> consultarProdutosBaseAtivos() {
+    public List<ProdutoBaseOutputDto> consultarProdutosBaseAtivos(Integer idPraia) {
+        if (idPraia != null) {
+            return produtoBaseRepository.findAllByEstaAtivoTrueAndIdPraia(idPraia)
+                    .stream()
+                    .map(ProdutoBaseOutputDto::fromEntity)
+                    .toList();
+        }
         return produtoBaseRepository.findAllByEstaAtivoTrue()
                 .stream()
                 .map(ProdutoBaseOutputDto::fromEntity)
