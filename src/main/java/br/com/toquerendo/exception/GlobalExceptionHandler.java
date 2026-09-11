@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -90,6 +91,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(VendedorJaCadastradoException.class)
     public ResponseEntity<ApiResponse<Object>> handleVendedorJaCadastradoException(VendedorJaCadastradoException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        return ResponseEntity.badRequest().body(new ApiResponse<>("Parâmetro obrigatório ausente: " + e.getParameterName()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
