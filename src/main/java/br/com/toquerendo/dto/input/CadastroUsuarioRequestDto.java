@@ -30,4 +30,7 @@ public class CadastroUsuarioRequestDto {
     @Schema(description = "CPF do usuário, apenas dígitos", example = "12345678900")
     @Pattern(regexp = "\\d{11}", message = "cpf deve conter 11 dígitos numéricos")
     private String cpf;
+
+    @Schema(description = "ID da praia atual do usuário", example = "1")
+    private Long idPraia;
 }
