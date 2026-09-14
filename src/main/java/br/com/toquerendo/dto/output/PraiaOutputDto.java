@@ -30,6 +30,9 @@ public class PraiaOutputDto {
     private Integer qtdVendedoresOnline;
 
     public static PraiaOutputDto fromEntity(Praia praia) {
+        if(praia == null) {
+            return null;
+        }
         return PraiaOutputDto.builder()
                 .id(praia.getId())
                 .nome(praia.getNome())

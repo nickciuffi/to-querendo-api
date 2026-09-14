@@ -4,12 +4,16 @@ import br.com.toquerendo.dto.input.AtualizarUsuarioRequestDto;
 import br.com.toquerendo.dto.input.CadastroUsuarioRequestDto;
 import br.com.toquerendo.dto.output.UsuarioOutputDto;
 import br.com.toquerendo.entity.Categoria;
+import br.com.toquerendo.entity.Praia;
 import br.com.toquerendo.entity.Usuario;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
 import br.com.toquerendo.exception.CpfJaCadastradoException;
 import br.com.toquerendo.exception.EmailJaCadastradoException;
+import br.com.toquerendo.exception.RuntimeApiException;
 import br.com.toquerendo.exception.UsuarioNaoAutorizadoException;
+import br.com.toquerendo.repository.PraiaRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
+import br.com.toquerendo.utils.DocumentoUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +27,8 @@ import java.time.LocalDateTime;
 public class UsuarioServiceImpl {
 
     private UsuarioRepository usuarioRepository;
+
+    private PraiaRepository praiaRepository;
 
     private PasswordEncoder passwordEncoder;
 
@@ -54,23 +60,30 @@ public class UsuarioServiceImpl {
     public UsuarioOutputDto editarUsuario(AtualizarUsuarioRequestDto req) {
         Usuario usuario = buscarUsuarioAutenticado();
 
+        if(req.getIdPraia() != null){
+            Praia praia = praiaRepository.findById(req.getIdPraia())
+                    .orElseThrow(() -> new RuntimeApiException("Praia não encontrada."));
+            usuario.setPraia(praia);
+        }
+        if(req.getCpf() != null){
+            if (usuarioRepository.existsByCpf(req.getCpf()) && (usuario.getCpf() == null || !usuario.getCpf().equals(req.getCpf()))) {
+                throw new CpfJaCadastradoException();
+            }
+            if(!DocumentoUtils.isCpfValido(req.getCpf())){
+                throw new RuntimeApiException("CPF inválido.");
+            }
+            usuario.setCpf(req.getCpf());
+        }
         usuario.setNome(req.getNome() != null ? req.getNome() : usuario.getNome());
         usuario.setTelefone(req.getTelefone() != null ? req.getTelefone() : usuario.getTelefone());
-        usuario.setCpf(req.getCpf() != null ? req.getCpf() : usuario.getCpf());
         usuario.setUrlFoto(req.getUrlFoto() != null ? req.getUrlFoto() : usuario.getUrlFoto());
-        usuario.setPraiaId(req.getIdPraia() != null ? req.getIdPraia() : (usuario.getPraia() != null ? usuario.getPraia().getId() : null));
 
         return UsuarioOutputDto.fromEntity(usuarioRepository.save(usuario));
     }
 
     public UsuarioOutputDto consultarUsuarioAutenticado() {
-
         Usuario userEnt = buscarUsuarioAutenticado();
-        UsuarioOutputDto user = UsuarioOutputDto.fromEntity(userEnt);
-        Categoria cat = userEnt.getCategoria();
-        user.setCategoria(userEnt.getCategoria() != null ? userEnt.getCategoria().getDescricao() : "Sem categoria definida");
-        user.setPraiaAtual(userEnt.getPraia() != null ? userEnt.getPraia().getNome() : "Sem praia definida");
-        return user;
+        return UsuarioOutputDto.fromEntity(userEnt);
     }
 
     private Usuario buscarUsuarioAutenticado() {
