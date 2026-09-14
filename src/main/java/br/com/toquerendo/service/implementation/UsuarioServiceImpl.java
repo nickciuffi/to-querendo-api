@@ -44,6 +44,7 @@ public class UsuarioServiceImpl {
         usuario.setTsCriacaoConta(LocalDateTime.now());
         usuario.setContaAtiva(true);
         usuario.setCategoriaId(CategoriaUsuarioEnum.TURISTA.getId());
+        usuario.setPraiaId(cadastroRequest.getIdPraia());
 
         Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
