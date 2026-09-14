@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CpfJaCadastradoException.class)
     public ResponseEntity<ApiResponse<Object>> handleCpfJaCadastradoException(CpfJaCadastradoException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage()));
     }
 
     @ExceptionHandler(UsuarioNaoAutorizadoException.class)

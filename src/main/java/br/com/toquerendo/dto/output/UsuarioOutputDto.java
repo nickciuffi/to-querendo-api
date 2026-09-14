@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UsuarioOutputDto {
 
     @Schema(description = "Email do usuário", example = "usuario@email.com")
@@ -25,14 +24,17 @@ public class UsuarioOutputDto {
     @Schema(description = "CPF do usuário", example = "12345678900")
     private String cpf;
 
+    @Schema(description = "URL da foto de perfil do usuário", example = "https://exemplo.com/foto.jpg")
+    private String urlFoto;
+
     @Schema(description = "Indica se a conta do usuário está ativa", example = "true")
     private Boolean contaAtiva;
 
     @Schema(description = "Praia atual do usuário", example = "Praia do Forte")
-    private String praiaAtual;
+    private PraiaOutputDto praiaAtual;
 
     @Schema(description = "Categoria do usuário", example = "Vendedor")
-    private String categoria;
+    private CategoriaOutputDto categoria;
 
     public static UsuarioOutputDto fromEntity(Usuario usuario) {
         return UsuarioOutputDto.builder()
@@ -41,6 +43,9 @@ public class UsuarioOutputDto {
                 .telefone(usuario.getTelefone())
                 .cpf(usuario.getCpf())
                 .contaAtiva(usuario.getContaAtiva())
+                .urlFoto(usuario.getUrlFoto())
+                .praiaAtual(PraiaOutputDto.fromEntity(usuario.getPraia()))
+                .categoria(CategoriaOutputDto.fromEntity(usuario.getCategoria()))
                 .build();
     }
 }
