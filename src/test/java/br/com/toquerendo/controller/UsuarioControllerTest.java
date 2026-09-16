@@ -1,5 +1,7 @@
 package br.com.toquerendo.controller;
 
+import br.com.toquerendo.dto.output.CategoriaOutputDto;
+import br.com.toquerendo.dto.output.PraiaOutputDto;
 import br.com.toquerendo.dto.output.UsuarioOutputDto;
 import br.com.toquerendo.exception.GlobalExceptionHandler;
 import br.com.toquerendo.exception.UsuarioNaoAutorizadoException;
@@ -38,8 +40,8 @@ class UsuarioControllerTest {
         UsuarioOutputDto output = UsuarioOutputDto.builder()
                 .email("usuario@email.com")
                 .nome("Fulano de Tal")
-                .categoria("Turista")
-                .praiaAtual("Sem praia definida")
+                .categoria(new CategoriaOutputDto())
+                .praiaAtual(PraiaOutputDto.builder().build())
                 .build();
 
         when(usuarioService.consultarUsuarioAutenticado()).thenReturn(output);

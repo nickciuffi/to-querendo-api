@@ -74,8 +74,8 @@ class UsuarioServiceImplTest {
 
         assertThat(output.getEmail()).isEqualTo(EMAIL_USUARIO_LOGADO);
         assertThat(output.getNome()).isEqualTo("Fulano de Tal");
-        assertThat(output.getCategoria()).isEqualTo("Vendedor");
-        assertThat(output.getPraiaAtual()).isEqualTo("Praia do Forte");
+        assertThat(output.getCategoria().getDescricao()).isEqualTo("Vendedor");
+        assertThat(output.getPraiaAtual().getNome()).isEqualTo("Praia do Forte");
     }
 
     @Test
@@ -87,8 +87,8 @@ class UsuarioServiceImplTest {
 
         UsuarioOutputDto output = usuarioService.consultarUsuarioAutenticado();
 
-        assertThat(output.getCategoria()).isEqualTo("Sem categoria definida");
-        assertThat(output.getPraiaAtual()).isEqualTo("Sem praia definida");
+        assertThat(output.getCategoria()).isNull();
+        assertThat(output.getPraiaAtual()).isNull();
     }
 
     @Test
