@@ -78,13 +78,19 @@ public class VendedorServiceImpl {
     }
 
     public List<VendedorLocalizacaoOutputDto> consultarLocalizacaoVendedores(Long idProdutoBase, Long idPraia) {
-        produtoBaseRepository.findByIdAndEstaAtivoTrue(idProdutoBase)
-                .orElseThrow(ProdutoNaoEncontradoException::new);
 
         praiaRepository.findById(idPraia)
                 .orElseThrow(PraiaNaoEncontradaException::new);
 
-        List<Vendedor> vendedores = vendedorRepository.findAllVendedoresOnlinePorProdutoBaseEPraia(idProdutoBase, idPraia);
+        List<Vendedor> vendedores;
+        if(idProdutoBase != null){
+            produtoBaseRepository.findByIdAndEstaAtivoTrue(idProdutoBase)
+                    .orElseThrow(ProdutoNaoEncontradoException::new);
+            vendedores = vendedorRepository.findAllVendedoresOnlinePorProdutoBaseEPraia(idProdutoBase, idPraia);
+        }
+        else{
+            vendedores = vendedorRepository.findAllVendedoresOnlinePorPraia(idPraia);
+        }
         return vendedores.stream()
                 .map(vendedor -> {
                     Usuario usuario = vendedor.getUsuario();

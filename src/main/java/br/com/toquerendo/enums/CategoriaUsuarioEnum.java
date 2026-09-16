@@ -11,7 +11,7 @@ public enum CategoriaUsuarioEnum {
 
     TURISTA(1, "Turista", List.of("ROLE_TURISTA")),
     VENDEDOR(2, "Vendedor", List.of("ROLE_TURISTA", "ROLE_VENDEDOR")),
-    ADMINISTRADOR(3, "Administrador", List.of("ROLE_ADMIN"));
+    ADMINISTRADOR(3, "Administrador", List.of("ROLE_TURISTA", "ROLE_VENDEDOR", "ROLE_ADMIN"));
 
     private Integer id;
     private String descricao;
