@@ -1,6 +1,7 @@
 package br.com.toquerendo.config;
 
 import br.com.toquerendo.security.JwtAuthenticationFilter;
+import br.com.toquerendo.security.SecurityConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,13 +26,6 @@ import java.util.List;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private static final String[] ROTAS_PUBLICAS = {
-            "/auth/login",
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/collection"
-    };
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -63,8 +57,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(ROTAS_PUBLICAS).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/usuario").permitAll()
+                        .requestMatchers(SecurityConstants.ROTAS_PUBLICAS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

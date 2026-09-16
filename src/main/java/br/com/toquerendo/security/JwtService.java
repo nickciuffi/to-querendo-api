@@ -40,25 +40,23 @@ public class JwtService {
         return expiracaoMs;
     }
 
-    public Optional<ApiUser> validarTokenEExtrairEmail(String token) {
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(chave)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+    public Optional<ApiUser> validarTokenEExtrairEmail(String token) throws JwtException {
 
-            Integer categoria = claims.get("categoria", Integer.class);
-            if (categoria == null) {
-                return Optional.empty();
-            }
+        Claims claims = Jwts.parser()
+                .verifyWith(chave)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
 
-            ApiUser apiUser = new ApiUser();
-            apiUser.setEmail(claims.getSubject());
-            apiUser.setCategoria(categoria);
-            return Optional.of(apiUser);
-        } catch (JwtException | IllegalArgumentException e) {
+        Integer categoria = claims.get("categoria", Integer.class);
+        if (categoria == null) {
             return Optional.empty();
         }
+
+        ApiUser apiUser = new ApiUser();
+        apiUser.setEmail(claims.getSubject());
+        apiUser.setCategoria(categoria);
+        return Optional.of(apiUser);
+
     }
 }

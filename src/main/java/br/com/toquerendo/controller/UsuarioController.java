@@ -31,7 +31,7 @@ public class UsuarioController {
 
     private UsuarioServiceImpl usuarioService;
 
-    @PostMapping("")
+    @PostMapping("/cadastrar")
     @SecurityRequirements
     @Operation(
             summary = "Cadastrar usuário",

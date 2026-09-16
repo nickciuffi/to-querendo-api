@@ -1,6 +1,7 @@
 package br.com.toquerendo.exception;
 
 import br.com.toquerendo.dto.ApiResponse;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -137,6 +138,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeApiException.class)
     public ResponseEntity<ApiResponse<Object>> handleRuntimeApiException(RuntimeApiException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponse<Object>> handleExpiredJwtException(ExpiredJwtException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Token expirado."));
     }
 
 }
