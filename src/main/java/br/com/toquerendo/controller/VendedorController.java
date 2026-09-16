@@ -127,7 +127,7 @@ public class VendedorController {
             )
     })
     public ResponseEntity<ApiResponse<List<VendedorLocalizacaoOutputDto>>> consultarLocalizacaoVendedores(
-            @Parameter(description = "Identificador do produto base", required = false) @RequestParam Long idProdutoBase,
+            @Parameter(description = "Identificador do produto base", required = false) @RequestParam(required = false) Long idProdutoBase,
             @Parameter(description = "Identificador da praia", required = true) @RequestParam Long idPraia) {
         List<VendedorLocalizacaoOutputDto> vendedores =
                 vendedorService.consultarLocalizacaoVendedores(idProdutoBase, idPraia);
