@@ -45,8 +45,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authHeader.substring(7);
             ApiUser user;
             try {
-                Optional<ApiUser> userOpt = jwtService.validarTokenEExtrairEmail(token);
-                if(userOpt.isPresent()) {
+                Optional<ApiUser> userOpt = jwtService.validarTokenEExtrairInformacoes(token);
+                if(userOpt.isPresent() && userOpt.get().getEmail() != null && !userOpt.get().getRoles().isEmpty()) {
                     user = userOpt.get();
                 }
                 else{
@@ -67,10 +67,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (user.getCategoria() != null
-                    && SecurityContextHolder.getContext().getAuthentication() == null) {
-                List<SimpleGrantedAuthority> authorities = CategoriaUsuarioEnum.fromId(user.getCategoria())
-                        .getRoles()
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                List<SimpleGrantedAuthority> authorities = user.getRoles()
                         .stream()
                         .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
                         .toList();
