@@ -1,6 +1,7 @@
 package br.com.toquerendo.security;
 
 import br.com.toquerendo.dto.ApiUser;
+import br.com.toquerendo.enums.CategoriaUsuarioEnum;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -9,7 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -29,7 +32,7 @@ public class JwtService {
         Date expiracao = new Date(agora.getTime() + expiracaoMs);
         return Jwts.builder()
                 .subject(email)
-                .claim("categoria", categoria)
+                .claim("roles", CategoriaUsuarioEnum.fromId(categoria).getRoles())
                 .issuedAt(agora)
                 .expiration(expiracao)
                 .signWith(chave)
@@ -40,7 +43,7 @@ public class JwtService {
         return expiracaoMs;
     }
 
-    public Optional<ApiUser> validarTokenEExtrairEmail(String token) throws JwtException {
+    public Optional<ApiUser> validarTokenEExtrairInformacoes(String token) throws JwtException {
 
         Claims claims = Jwts.parser()
                 .verifyWith(chave)
@@ -48,14 +51,16 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        Integer categoria = claims.get("categoria", Integer.class);
-        if (categoria == null) {
+        @SuppressWarnings("unchecked")
+        List<String> roles = claims.get("roles", List.class);
+
+        if (roles == null || roles.isEmpty()) {
             return Optional.empty();
         }
 
         ApiUser apiUser = new ApiUser();
         apiUser.setEmail(claims.getSubject());
-        apiUser.setCategoria(categoria);
+        apiUser.setRoles(roles);
         return Optional.of(apiUser);
 
     }
