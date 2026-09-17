@@ -7,6 +7,7 @@ import br.com.toquerendo.entity.Praia;
 import br.com.toquerendo.exception.PraiaNaoEncontradaException;
 import br.com.toquerendo.repository.PraiaRepository;
 import br.com.toquerendo.repository.VendedorRepository;
+import br.com.toquerendo.service.PraiaService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +15,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class PraiaServiceImpl {
+public class PraiaServiceImpl implements PraiaService {
 
     private final PraiaRepository praiaRepository;
 

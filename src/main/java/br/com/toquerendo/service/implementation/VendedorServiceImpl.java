@@ -12,6 +12,7 @@ import br.com.toquerendo.exception.PraiaNaoEncontradaException;
 import br.com.toquerendo.exception.ProdutoNaoEncontradoException;
 import br.com.toquerendo.exception.VendedorJaCadastradoException;
 import br.com.toquerendo.repository.*;
+import br.com.toquerendo.service.VendedorService;
 import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.apache.catalina.security.SecurityUtil;
@@ -23,7 +24,7 @@ import java.util.Objects;
 
 @Service
 @AllArgsConstructor
-public class VendedorServiceImpl {
+public class VendedorServiceImpl implements VendedorService {
 
     private VendedorRepository vendedorRepository;
 

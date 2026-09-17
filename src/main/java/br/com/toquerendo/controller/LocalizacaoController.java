@@ -5,7 +5,7 @@ import br.com.toquerendo.dto.input.AtualizarLocalizacaoInputDto;
 import br.com.toquerendo.dto.output.LocalizacaoOutputDto;
 import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
 import br.com.toquerendo.security.annotation.TuristaOnly;
-import br.com.toquerendo.service.implementation.LocalizacaoServiceImpl;
+import br.com.toquerendo.service.LocalizacaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,7 +31,7 @@ import java.util.List;
 @Tag(name = "Localização", description = "Atualização e consulta da localização geográfica de usuários e vendedores")
 public class LocalizacaoController {
 
-    private final LocalizacaoServiceImpl localizacaoService;
+    private final LocalizacaoService localizacaoService;
 
     @PutMapping("")
     @TuristaOnly

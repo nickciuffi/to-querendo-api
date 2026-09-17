@@ -5,7 +5,7 @@ import br.com.toquerendo.dto.input.AtualizarUsuarioRequestDto;
 import br.com.toquerendo.dto.input.CadastroUsuarioRequestDto;
 import br.com.toquerendo.dto.output.UsuarioOutputDto;
 import br.com.toquerendo.security.annotation.AdminOnly;
-import br.com.toquerendo.service.implementation.UsuarioServiceImpl;
+import br.com.toquerendo.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Usuários", description = "Cadastro e manutenção de dados dos usuários")
 public class UsuarioController {
 
-    private UsuarioServiceImpl usuarioService;
+    private UsuarioService usuarioService;
 
     @PostMapping("/cadastrar")
     @SecurityRequirements

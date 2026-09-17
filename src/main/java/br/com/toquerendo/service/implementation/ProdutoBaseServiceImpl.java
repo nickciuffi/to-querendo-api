@@ -6,6 +6,7 @@ import br.com.toquerendo.dto.output.ProdutoBaseOutputDto;
 import br.com.toquerendo.entity.ProdutoBase;
 import br.com.toquerendo.exception.ProdutoNaoEncontradoException;
 import br.com.toquerendo.repository.ProdutoBaseRepository;
+import br.com.toquerendo.service.ProdutoBaseService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class ProdutoBaseServiceImpl {
+public class ProdutoBaseServiceImpl implements ProdutoBaseService {
 
     private final ProdutoBaseRepository produtoBaseRepository;
 

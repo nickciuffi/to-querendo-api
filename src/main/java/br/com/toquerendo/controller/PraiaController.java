@@ -5,7 +5,7 @@ import br.com.toquerendo.dto.input.AtualizarPraiaInputDto;
 import br.com.toquerendo.dto.input.CriarPraiaInputDto;
 import br.com.toquerendo.dto.output.PraiaOutputDto;
 import br.com.toquerendo.security.annotation.AdminOnly;
-import br.com.toquerendo.service.implementation.PraiaServiceImpl;
+import br.com.toquerendo.service.PraiaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +33,7 @@ import java.util.List;
 @Tag(name = "Praias", description = "Consulta e gestão das praias cadastradas na plataforma")
 public class PraiaController {
 
-    private final PraiaServiceImpl praiaService;
+    private final PraiaService praiaService;
 
     @GetMapping("")
     @Operation(

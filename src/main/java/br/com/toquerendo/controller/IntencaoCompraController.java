@@ -6,7 +6,7 @@ import br.com.toquerendo.dto.output.BanhistaComIntencoesOutputDto;
 import br.com.toquerendo.dto.output.IntencaoCompraOutputDto;
 import br.com.toquerendo.security.annotation.TuristaOnly;
 import br.com.toquerendo.security.annotation.VendedorOnly;
-import br.com.toquerendo.service.implementation.IntencaoCompraServiceImpl;
+import br.com.toquerendo.service.IntencaoCompraService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,7 +30,7 @@ import java.util.List;
 @Tag(name = "Intenções de Compra", description = "Cadastro de intenções de compra dos turistas para os produtos base")
 public class IntencaoCompraController {
 
-    private final IntencaoCompraServiceImpl intencaoCompraService;
+    private final IntencaoCompraService intencaoCompraService;
 
     @PostMapping("")
     @TuristaOnly
@@ -104,5 +104,35 @@ public class IntencaoCompraController {
     public ResponseEntity<ApiResponse<List<BanhistaComIntencoesOutputDto>>> consultarBanhistasComIntencaoDeCompra() {
         List<BanhistaComIntencoesOutputDto> banhistas = intencaoCompraService.consultarBanhistasComIntencaoDeCompra();
         return ResponseEntity.ok().body(new ApiResponse<>(banhistas, "Banhistas consultados com sucesso!"));
+    }
+
+    @GetMapping("/minhas-intencoes")
+    @TuristaOnly
+    @Operation(
+            summary = "Consultar intenções de compra do banhista autenticado",
+            description = "Retorna todas as intenções de compra registradas pelo turista (banhista) autenticado, "
+                    + "ativas ou não. Restrito a usuários com a role de turista."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Intenções de compra consultadas com sucesso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token ausente, inválido ou expirado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado não possui a role de turista",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    public ResponseEntity<ApiResponse<List<IntencaoCompraOutputDto>>> consultarIntencoesCompraBanhista() {
+        List<IntencaoCompraOutputDto> intencoes = intencaoCompraService.consultarIntencoesCompraBanhista();
+        return ResponseEntity.ok().body(new ApiResponse<>(intencoes, "Intenções de compra consultadas com sucesso!"));
     }
 }

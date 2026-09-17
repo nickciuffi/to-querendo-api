@@ -13,6 +13,7 @@ import br.com.toquerendo.exception.RuntimeApiException;
 import br.com.toquerendo.exception.UsuarioNaoAutorizadoException;
 import br.com.toquerendo.repository.PraiaRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
+import br.com.toquerendo.service.UsuarioService;
 import br.com.toquerendo.utils.DocumentoUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 
 @Service
 @AllArgsConstructor
-public class UsuarioServiceImpl {
+public class UsuarioServiceImpl implements UsuarioService {
 
     private UsuarioRepository usuarioRepository;
 

@@ -5,7 +5,7 @@ import br.com.toquerendo.dto.input.AtualizarProdutoEspecificoInputDto;
 import br.com.toquerendo.dto.input.CriarProdutoEspecificoInputDto;
 import br.com.toquerendo.dto.output.ProdutoEspecificoOutputDto;
 import br.com.toquerendo.security.annotation.VendedorOnly;
-import br.com.toquerendo.service.implementation.ProdutoEspecificoServiceImpl;
+import br.com.toquerendo.service.ProdutoEspecificoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,7 +32,7 @@ import java.util.List;
 @Tag(name = "Produtos Específicos", description = "Cadastro e gestão dos produtos oferecidos pelos vendedores")
 public class ProdutoEspecificoController {
 
-    private final ProdutoEspecificoServiceImpl produtoEspecificoService;
+    private final ProdutoEspecificoService produtoEspecificoService;
 
     @PostMapping("")
     @VendedorOnly

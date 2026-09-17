@@ -15,6 +15,7 @@ import br.com.toquerendo.repository.ProdutoBaseRepository;
 import br.com.toquerendo.repository.ProdutoEspecificoRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
 import br.com.toquerendo.repository.VendedorRepository;
+import br.com.toquerendo.service.IntencaoCompraService;
 import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class IntencaoCompraServiceImpl {
+public class IntencaoCompraServiceImpl implements IntencaoCompraService {
 
     private final IntencaoCompraRepository intencaoCompraRepository;
 
@@ -90,6 +91,15 @@ public class IntencaoCompraServiceImpl {
 
         return intencoesPorBanhista.values().stream()
                 .map(grupo -> BanhistaComIntencoesOutputDto.fromEntities(grupo.get(0).getUsuario(), grupo))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<IntencaoCompraOutputDto> consultarIntencoesCompraBanhista() {
+        String email = SecurityUtils.getEmailUsuarioLogado();
+
+        return intencaoCompraRepository.findAllByUsuarioEmail(email).stream()
+                .map(IntencaoCompraOutputDto::fromEntity)
                 .toList();
     }
 

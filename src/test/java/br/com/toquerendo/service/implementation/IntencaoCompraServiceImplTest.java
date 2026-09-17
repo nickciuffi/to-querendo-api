@@ -306,4 +306,40 @@ class IntencaoCompraServiceImplTest {
 
         verify(produtoEspecificoRepository, never()).findAllByVendedorIdAndProdutoAtivoTrue(any());
     }
+
+    @Test
+    void consultarIntencoesCompraBanhista_deveRetornarIntencoesDoUsuarioLogadoMapeadas() {
+        Usuario usuario = criarUsuario(1L);
+        ProdutoBase produtoBase = criarProdutoBase(10L);
+        IntencaoCompra intencao = criarIntencaoDeCompra(5L, usuario, produtoBase);
+
+        when(intencaoCompraRepository.findAllByUsuarioEmail(EMAIL_TURISTA_LOGADO))
+                .thenReturn(List.of(intencao));
+
+        List<IntencaoCompraOutputDto> resultado = intencaoCompraService.consultarIntencoesCompraBanhista();
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getId()).isEqualTo(5L);
+        assertThat(resultado.get(0).getIdUsuario()).isEqualTo(1L);
+        assertThat(resultado.get(0).getIdProdutoBase()).isEqualTo(10L);
+        assertThat(resultado.get(0).getNomeProdutoBase()).isEqualTo("Água de coco");
+    }
+
+    @Test
+    void consultarIntencoesCompraBanhista_quandoUsuarioSemIntencoes_deveRetornarListaVazia() {
+        when(intencaoCompraRepository.findAllByUsuarioEmail(EMAIL_TURISTA_LOGADO)).thenReturn(List.of());
+
+        List<IntencaoCompraOutputDto> resultado = intencaoCompraService.consultarIntencoesCompraBanhista();
+
+        assertThat(resultado).isEmpty();
+    }
+
+    @Test
+    void consultarIntencoesCompraBanhista_devePassarEmailDoUsuarioLogadoAoRepositorio() {
+        when(intencaoCompraRepository.findAllByUsuarioEmail(any())).thenReturn(List.of());
+
+        intencaoCompraService.consultarIntencoesCompraBanhista();
+
+        verify(intencaoCompraRepository).findAllByUsuarioEmail(EMAIL_TURISTA_LOGADO);
+    }
 }

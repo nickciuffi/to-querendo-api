@@ -6,7 +6,7 @@ import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.security.annotation.TuristaOnly;
 import br.com.toquerendo.security.annotation.VendedorOnly;
-import br.com.toquerendo.service.implementation.VendedorServiceImpl;
+import br.com.toquerendo.service.VendedorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +27,7 @@ import java.util.List;
 @Tag(name = "Vendedores", description = "gestão de usuários")
 public class VendedorController {
 
-    private VendedorServiceImpl vendedorService;
+    private VendedorService vendedorService;
 
     @PostMapping("")
     @Operation(

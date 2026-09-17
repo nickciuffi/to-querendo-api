@@ -5,7 +5,7 @@ import br.com.toquerendo.dto.input.AtualizarProdutoBaseInputDto;
 import br.com.toquerendo.dto.input.CriarProdutoBaseInputDto;
 import br.com.toquerendo.dto.output.ProdutoBaseOutputDto;
 import br.com.toquerendo.security.annotation.AdminOnly;
-import br.com.toquerendo.service.implementation.ProdutoBaseServiceImpl;
+import br.com.toquerendo.service.ProdutoBaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +26,7 @@ import java.util.List;
 @Tag(name = "Produtos Base", description = "Consulta e gestão dos produtos base oferecidos na plataforma")
 public class ProdutoBaseController {
 
-    private final ProdutoBaseServiceImpl produtoBaseService;
+    private final ProdutoBaseService produtoBaseService;
 
     @GetMapping("")
     @Operation(

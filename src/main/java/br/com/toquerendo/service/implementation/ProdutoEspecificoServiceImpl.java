@@ -12,6 +12,7 @@ import br.com.toquerendo.exception.RuntimeApiException;
 import br.com.toquerendo.repository.ProdutoBaseRepository;
 import br.com.toquerendo.repository.ProdutoEspecificoRepository;
 import br.com.toquerendo.repository.VendedorRepository;
+import br.com.toquerendo.service.ProdutoEspecificoService;
 import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import java.util.Objects;
 
 @Service
 @AllArgsConstructor
-public class ProdutoEspecificoServiceImpl {
+public class ProdutoEspecificoServiceImpl implements ProdutoEspecificoService {
 
     private final ProdutoEspecificoRepository produtoEspecificoRepository;
 

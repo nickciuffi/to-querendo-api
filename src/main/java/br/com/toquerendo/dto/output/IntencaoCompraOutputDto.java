@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IntencaoCompraOutputDto {
 
     @Schema(description = "Identificador da intenção de compra", example = "1")
@@ -37,12 +36,6 @@ public class IntencaoCompraOutputDto {
     @Schema(description = "Data e hora de criação da intenção de compra")
     private LocalDateTime tsCriacaoIntencao;
 
-    @Schema(description = "Data e hora de conclusão da intenção de compra")
-    private LocalDateTime tsConclusaoIntencao;
-
-    @Schema(description = "Indica se a intenção de compra está ativa", example = "true")
-    private Boolean estaAtivo;
-
     public static IntencaoCompraOutputDto fromEntity(IntencaoCompra intencaoCompra) {
         return IntencaoCompraOutputDto.builder()
                 .id(intencaoCompra.getId())
@@ -50,11 +43,9 @@ public class IntencaoCompraOutputDto {
                 .idProdutoBase(intencaoCompra.getProdutoBase().getId())
                 .nomeProdutoBase(intencaoCompra.getProdutoBase().getNome())
                 .descricaoLocal(intencaoCompra.getDescricaoLocal())
-                .observacoes(intencaoCompra.getObservacoes())
-                .urlFotoLocal(intencaoCompra.getUrlFotoLocal())
+                .observacoes(intencaoCompra.getObservacoes() != null ? intencaoCompra.getObservacoes() : "")
+                .urlFotoLocal(intencaoCompra.getUrlFotoLocal() != null ? intencaoCompra.getUrlFotoLocal() : "")
                 .tsCriacaoIntencao(intencaoCompra.getTsCriacaoIntencao())
-                .tsConclusaoIntencao(intencaoCompra.getTsConclusaoIntencao())
-                .estaAtivo(intencaoCompra.getEstaAtivo())
                 .build();
     }
 }

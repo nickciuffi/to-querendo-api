@@ -20,4 +20,12 @@ public interface IntencaoCompraRepository extends JpaRepository<IntencaoCompra, 
             @Param("idCategoriaTurista") Integer idCategoriaTurista,
             @Param("idPraia") Long idPraia,
             @Param("idsProdutoBase") List<Long> idsProdutoBase);
+
+    @Query("select ic from IntencaoCompra ic " +
+            "join fetch ic.usuario u " +
+            "join fetch ic.produtoBase pb " +
+            "where u.email = :email " +
+            "and ic.estaAtivo = true " +
+            "order by ic.tsCriacaoIntencao desc")
+    List<IntencaoCompra> findAllByUsuarioEmail(@Param("email") String email);
 }

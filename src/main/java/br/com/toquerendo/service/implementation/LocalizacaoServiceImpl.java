@@ -12,6 +12,7 @@ import br.com.toquerendo.repository.PraiaRepository;
 import br.com.toquerendo.repository.ProdutoBaseRepository;
 import br.com.toquerendo.repository.ProdutoEspecificoRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
+import br.com.toquerendo.service.LocalizacaoService;
 import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class LocalizacaoServiceImpl {
+public class LocalizacaoServiceImpl implements LocalizacaoService {
 
     private final LocalizacaoRepository localizacaoRepository;
 
