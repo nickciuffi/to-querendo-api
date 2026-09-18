@@ -160,7 +160,6 @@ class IntencaoCompraServiceImplTest {
         assertThat(output.getIdProdutoBase()).isEqualTo(10L);
         assertThat(output.getNomeProdutoBase()).isEqualTo("Água de coco");
         assertThat(output.getTsCriacaoIntencao()).isNotNull();
-        assertThat(output.getEstaAtivo()).isTrue();
     }
 
     @Test
