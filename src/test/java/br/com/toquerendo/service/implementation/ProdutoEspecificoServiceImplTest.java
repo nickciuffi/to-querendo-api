@@ -271,16 +271,16 @@ class ProdutoEspecificoServiceImplTest {
     }
 
     @Test
-    void consultarProdutosAtivosDoVendedorLogado_deveRetornarApenasProdutosAtivosDoVendedor() {
+    void consultarProdutosDoVendedorLogado_deveRetornarApenasProdutosAtivosDoVendedor() {
         Vendedor vendedor = criarVendedor(1L);
         ProdutoBase produtoBase = criarProdutoBase(BigDecimal.valueOf(5.0));
         ProdutoEspecifico produtoAtivo = criarProdutoEspecificoEntity(vendedor, produtoBase);
 
         when(vendedorRepository.findByUsuarioEmail(EMAIL_VENDEDOR_LOGADO)).thenReturn(Optional.of(vendedor));
-        when(produtoEspecificoRepository.findAllByVendedorIdAndProdutoAtivoTrue(1L))
+        when(produtoEspecificoRepository.findAllByVendedorId(1L))
                 .thenReturn(List.of(produtoAtivo));
 
-        List<ProdutoEspecificoOutputDto> resultado = produtoEspecificoService.consultarProdutosAtivosDoVendedorLogado();
+        List<ProdutoEspecificoOutputDto> resultado = produtoEspecificoService.consultarProdutosDoVendedorLogado();
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getIdVendedor()).isEqualTo(1L);
@@ -288,12 +288,12 @@ class ProdutoEspecificoServiceImplTest {
     }
 
     @Test
-    void consultarProdutosAtivosDoVendedorLogado_quandoNaoHaProdutosAtivos_deveRetornarListaVazia() {
+    void consultarProdutosDoVendedorLogado_quandoNaoHaProdutos_deveRetornarListaVazia() {
         Vendedor vendedor = criarVendedor(1L);
         when(vendedorRepository.findByUsuarioEmail(EMAIL_VENDEDOR_LOGADO)).thenReturn(Optional.of(vendedor));
-        when(produtoEspecificoRepository.findAllByVendedorIdAndProdutoAtivoTrue(1L)).thenReturn(List.of());
+        when(produtoEspecificoRepository.findAllByVendedorId(1L)).thenReturn(List.of());
 
-        List<ProdutoEspecificoOutputDto> resultado = produtoEspecificoService.consultarProdutosAtivosDoVendedorLogado();
+        List<ProdutoEspecificoOutputDto> resultado = produtoEspecificoService.consultarProdutosDoVendedorLogado();
 
         assertThat(resultado).isEmpty();
     }

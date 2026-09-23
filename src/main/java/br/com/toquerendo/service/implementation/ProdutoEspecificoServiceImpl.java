@@ -79,10 +79,10 @@ public class ProdutoEspecificoServiceImpl implements ProdutoEspecificoService {
         return ProdutoEspecificoOutputDto.fromEntity(produtoAtualizado);
     }
 
-    public List<ProdutoEspecificoOutputDto> consultarProdutosAtivosDoVendedorLogado() {
+    public List<ProdutoEspecificoOutputDto> consultarProdutosDoVendedorLogado() {
         Vendedor vendedor = buscarVendedorLogado();
 
-        return produtoEspecificoRepository.findAllByVendedorIdAndProdutoAtivoTrue(vendedor.getId())
+        return produtoEspecificoRepository.findAllByVendedorId(vendedor.getId())
                 .stream()
                 .map(ProdutoEspecificoOutputDto::fromEntity)
                 .toList();

@@ -157,8 +157,8 @@ class ProdutoEspecificoControllerTest {
     }
 
     @Test
-    void consultarProdutosAtivosDoVendedorLogado_deveRetornar200ComListaDeProdutos() throws Exception {
-        when(produtoEspecificoService.consultarProdutosAtivosDoVendedorLogado()).thenReturn(List.of(criarOutput()));
+    void consultarProdutosDoVendedorLogado_deveRetornar200ComListaDeProdutos() throws Exception {
+        when(produtoEspecificoService.consultarProdutosDoVendedorLogado()).thenReturn(List.of(criarOutput()));
 
         mockMvc.perform(get("/produto-especifico/meus-produtos"))
                 .andExpect(status().isOk())

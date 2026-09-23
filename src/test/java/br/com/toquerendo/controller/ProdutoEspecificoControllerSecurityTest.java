@@ -109,8 +109,8 @@ class ProdutoEspecificoControllerSecurityTest {
 
     @Test
     @WithMockUser(roles = "VENDEDOR")
-    void consultarProdutosAtivosDoVendedorLogado_comRoleVendedor_deveSerPermitido() throws Exception {
-        when(produtoEspecificoService.consultarProdutosAtivosDoVendedorLogado()).thenReturn(Collections.emptyList());
+    void consultarProdutosDoVendedorLogado_comRoleVendedor_deveSerPermitido() throws Exception {
+        when(produtoEspecificoService.consultarProdutosDoVendedorLogado()).thenReturn(Collections.emptyList());
 
         mockMvc.perform(get("/produto-especifico/meus-produtos"))
                 .andExpect(status().isOk());
