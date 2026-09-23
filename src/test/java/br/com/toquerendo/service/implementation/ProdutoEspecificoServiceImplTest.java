@@ -25,6 +25,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,6 +92,7 @@ class ProdutoEspecificoServiceImplTest {
         produtoEspecifico.setProdutoAtivo(true);
         produtoEspecifico.setVendedor(vendedor);
         produtoEspecifico.setProdutoBase(produtoBase);
+        produtoEspecifico.setTsCriacaoProduto(LocalDateTime.of(2026, 1, 15, 10, 30));
         return produtoEspecifico;
     }
 

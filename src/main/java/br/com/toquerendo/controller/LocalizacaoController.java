@@ -3,7 +3,6 @@ package br.com.toquerendo.controller;
 import br.com.toquerendo.dto.ApiResponse;
 import br.com.toquerendo.dto.input.AtualizarLocalizacaoInputDto;
 import br.com.toquerendo.dto.output.LocalizacaoOutputDto;
-import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
 import br.com.toquerendo.security.annotation.TuristaOnly;
 import br.com.toquerendo.service.LocalizacaoService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -27,9 +27,11 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Long> {
             @Param("idProdutoBase") Long idProdutoBase,
             @Param("idPraia") Long idPraia);
 
-    @Query("select v from Vendedor v " +
-            "where v.usuario.praia.id = :idPraia " +
-            "and v.online = true ")
-    List<Vendedor> findAllVendedoresOnlinePorPraia(@Param("idPraia") Long idPraia);
+    @Query("select distinct pe.vendedor from ProdutoEspecifico pe " +
+            "where pe.produtoAtivo = true " +
+            "and pe.produtoBase.estaAtivo = true " +
+            "and pe.vendedor.online = true " +
+            "and pe.vendedor.usuario.praia.id = :idPraia")
+    List<Vendedor> findAllVendedoresOnlinePorPraiaComAlgumProduto(@Param("idPraia") Long idPraia);
 
 }
