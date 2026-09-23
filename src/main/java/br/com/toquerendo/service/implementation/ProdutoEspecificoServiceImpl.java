@@ -88,6 +88,20 @@ public class ProdutoEspecificoServiceImpl implements ProdutoEspecificoService {
                 .toList();
     }
 
+    public ProdutoEspecificoOutputDto deletarProdutoEspecifico(Long id) {
+        Vendedor vendedor = buscarVendedorLogado();
+
+        ProdutoEspecifico produtoEspecifico = produtoEspecificoRepository.findById(id)
+                .orElseThrow(ProdutoNaoEncontradoException::new);
+
+        if (!Objects.equals(produtoEspecifico.getVendedor().getId(), vendedor.getId())) {
+            throw new ProdutoNaoPertenceAoVendedorException();
+        }
+
+        produtoEspecificoRepository.delete(produtoEspecifico);
+        return ProdutoEspecificoOutputDto.fromEntity(produtoEspecifico);
+    }
+
     private Vendedor buscarVendedorLogado() {
         String email = SecurityUtils.getEmailUsuarioLogado();
         return vendedorRepository.findByUsuarioEmail(email)
