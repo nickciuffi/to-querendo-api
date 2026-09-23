@@ -91,6 +91,6 @@ public class ProdutoEspecificoServiceImpl implements ProdutoEspecificoService {
     private Vendedor buscarVendedorLogado() {
         String email = SecurityUtils.getEmailUsuarioLogado();
         return vendedorRepository.findByUsuarioEmail(email)
-                .orElseThrow(() -> new RuntimeException("Vendedor não encontrado."));
+                .orElseThrow(() -> new RuntimeApiException("Vendedor não encontrado."));
     }
 }

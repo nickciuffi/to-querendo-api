@@ -2,7 +2,7 @@ package br.com.toquerendo.controller;
 
 import br.com.toquerendo.dto.ApiResponse;
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
-import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
+import br.com.toquerendo.dto.output.VendedorLocalizacaoProdutosOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.security.annotation.TuristaOnly;
 import br.com.toquerendo.security.annotation.VendedorOnly;
@@ -126,10 +126,10 @@ public class VendedorController {
                             schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    public ResponseEntity<ApiResponse<List<VendedorLocalizacaoOutputDto>>> consultarLocalizacaoVendedores(
+    public ResponseEntity<ApiResponse<List<VendedorLocalizacaoProdutosOutputDto>>> consultarLocalizacaoVendedores(
             @Parameter(description = "Identificador do produto base", required = false) @RequestParam(required = false) Long idProdutoBase,
             @Parameter(description = "Identificador da praia", required = true) @RequestParam Long idPraia) {
-        List<VendedorLocalizacaoOutputDto> vendedores =
+        List<VendedorLocalizacaoProdutosOutputDto> vendedores =
                 vendedorService.consultarLocalizacaoVendedores(idProdutoBase, idPraia);
         return ResponseEntity.ok().body(new ApiResponse<>(vendedores, "Localizações consultadas com sucesso!"));
     }

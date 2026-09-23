@@ -7,12 +7,14 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProdutoEspecificoOutputDto {
+
+    private static final DateTimeFormatter FORMATO_TS_CRIACAO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Schema(description = "Identificador do produto específico", example = "1")
     private Long id;
@@ -41,8 +43,11 @@ public class ProdutoEspecificoOutputDto {
     @Schema(description = "Indica se o produto está ativo e disponível para venda", example = "true")
     private Boolean produtoAtivo;
 
+    @Schema(description = "Indica se o produto base associado está ativo e disponível para venda", example = "true")
+    private Boolean produtoBaseAtivo;
+
     @Schema(description = "Data e hora de criação do produto")
-    private LocalDateTime tsCriacaoProduto;
+    private String tsCriacaoProduto;
 
     public static ProdutoEspecificoOutputDto fromEntity(ProdutoEspecifico produtoEspecifico) {
         return ProdutoEspecificoOutputDto.builder()
@@ -55,7 +60,8 @@ public class ProdutoEspecificoOutputDto {
                 .idVendedor(produtoEspecifico.getVendedor().getId())
                 .preco(produtoEspecifico.getPreco())
                 .produtoAtivo(produtoEspecifico.getProdutoAtivo())
-                .tsCriacaoProduto(produtoEspecifico.getTsCriacaoProduto())
+                .produtoBaseAtivo(produtoEspecifico.getProdutoBase().getEstaAtivo())
+                .tsCriacaoProduto(produtoEspecifico.getTsCriacaoProduto().format(FORMATO_TS_CRIACAO))
                 .build();
     }
 }

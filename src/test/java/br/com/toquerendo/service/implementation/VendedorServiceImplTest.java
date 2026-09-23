@@ -1,7 +1,7 @@
 package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
-import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
+import br.com.toquerendo.dto.output.VendedorLocalizacaoProdutosOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.entity.Categoria;
 import br.com.toquerendo.entity.Localizacao;
@@ -37,7 +37,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -291,7 +290,7 @@ class VendedorServiceImplTest {
         assertThatThrownBy(() -> vendedorService.consultarLocalizacaoVendedores(null, 1L))
                 .isInstanceOf(PraiaNaoEncontradaException.class);
 
-        verify(vendedorRepository, never()).findAllVendedoresOnlinePorPraia(any());
+        verify(vendedorRepository, never()).findAllVendedoresOnlinePorPraiaComAlgumProduto(any());
     }
 
     @Test
@@ -303,10 +302,10 @@ class VendedorServiceImplTest {
         Usuario usuario = criarUsuarioTuristaApto();
         Vendedor vendedor = criarVendedor(1L, usuario);
 
-        when(vendedorRepository.findAllVendedoresOnlinePorPraia(1L)).thenReturn(List.of(vendedor));
+        when(vendedorRepository.findAllVendedoresOnlinePorPraiaComAlgumProduto(1L)).thenReturn(List.of(vendedor));
         when(localizacaoRepository.findById(1L)).thenReturn(Optional.empty());
 
-        List<VendedorLocalizacaoOutputDto> resultado = vendedorService.consultarLocalizacaoVendedores(null, 1L);
+        List<VendedorLocalizacaoProdutosOutputDto> resultado = vendedorService.consultarLocalizacaoVendedores(null, 1L);
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getLatitude()).isEqualByComparingTo("0");
@@ -333,11 +332,11 @@ class VendedorServiceImplTest {
         when(vendedorRepository.findAllVendedoresOnlinePorProdutoBaseEPraia(10L, 1L)).thenReturn(List.of(vendedor));
         when(localizacaoRepository.findById(1L)).thenReturn(Optional.of(localizacao));
 
-        List<VendedorLocalizacaoOutputDto> resultado = vendedorService.consultarLocalizacaoVendedores(10L, 1L);
+        List<VendedorLocalizacaoProdutosOutputDto> resultado = vendedorService.consultarLocalizacaoVendedores(10L, 1L);
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getLatitude()).isEqualByComparingTo("-23.5614750");
-        verify(vendedorRepository, never()).findAllVendedoresOnlinePorPraia(any());
+        verify(vendedorRepository, never()).findAllVendedoresOnlinePorPraiaComAlgumProduto(any());
     }
 
     @Test

@@ -2,11 +2,8 @@ package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.input.AtualizarLocalizacaoInputDto;
 import br.com.toquerendo.dto.output.LocalizacaoOutputDto;
-import br.com.toquerendo.dto.output.VendedorLocalizacaoOutputDto;
 import br.com.toquerendo.entity.Localizacao;
 import br.com.toquerendo.entity.Usuario;
-import br.com.toquerendo.exception.PraiaNaoEncontradaException;
-import br.com.toquerendo.exception.ProdutoNaoEncontradoException;
 import br.com.toquerendo.repository.LocalizacaoRepository;
 import br.com.toquerendo.repository.PraiaRepository;
 import br.com.toquerendo.repository.ProdutoBaseRepository;
