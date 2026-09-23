@@ -28,12 +28,5 @@ public interface ProdutoEspecificoRepository extends JpaRepository<ProdutoEspeci
             @Param("vendedorId") Long vendedorId,
             @Param("idProdutoBase") Long idProdutoBase);
 
-    @Query("select pe from ProdutoEspecifico pe " +
-            "where pe.produtoBase.id = :idProdutoBase " +
-            "and pe.produtoAtivo = true " +
-            "and pe.vendedor.online = true " +
-            "and pe.vendedor.usuario.praia.id = :idPraia")
-    List<ProdutoEspecifico> findAllComVendedorOnlinePorProdutoBaseEPraia(
-            @Param("idProdutoBase") Long idProdutoBase,
-            @Param("idPraia") Long idPraia);
+    List<ProdutoEspecifico> findAllByVendedorId(@Param("vendedorId") Long vendedorId);
 }

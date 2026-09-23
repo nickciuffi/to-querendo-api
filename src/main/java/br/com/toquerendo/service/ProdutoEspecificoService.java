@@ -12,5 +12,5 @@ public interface ProdutoEspecificoService {
 
     ProdutoEspecificoOutputDto atualizarProdutoEspecifico(Long id, AtualizarProdutoEspecificoInputDto input);
 
-    List<ProdutoEspecificoOutputDto> consultarProdutosAtivosDoVendedorLogado();
+    List<ProdutoEspecificoOutputDto> consultarProdutosDoVendedorLogado();
 }

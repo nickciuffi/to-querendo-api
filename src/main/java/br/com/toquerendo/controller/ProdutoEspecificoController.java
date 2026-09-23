@@ -145,8 +145,8 @@ public class ProdutoEspecificoController {
                             schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    public ResponseEntity<ApiResponse<List<ProdutoEspecificoOutputDto>>> consultarProdutosAtivosDoVendedorLogado() {
-        List<ProdutoEspecificoOutputDto> produtos = produtoEspecificoService.consultarProdutosAtivosDoVendedorLogado();
+    public ResponseEntity<ApiResponse<List<ProdutoEspecificoOutputDto>>> consultarProdutosDoVendedorLogado() {
+        List<ProdutoEspecificoOutputDto> produtos = produtoEspecificoService.consultarProdutosDoVendedorLogado();
         return ResponseEntity.ok().body(new ApiResponse<>(produtos, "Produtos consultados com sucesso!"));
     }
 }
