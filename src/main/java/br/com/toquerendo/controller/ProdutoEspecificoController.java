@@ -16,13 +16,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -148,5 +142,28 @@ public class ProdutoEspecificoController {
     public ResponseEntity<ApiResponse<List<ProdutoEspecificoOutputDto>>> consultarProdutosDoVendedorLogado() {
         List<ProdutoEspecificoOutputDto> produtos = produtoEspecificoService.consultarProdutosDoVendedorLogado();
         return ResponseEntity.ok().body(new ApiResponse<>(produtos, "Produtos consultados com sucesso!"));
+    }
+
+    @DeleteMapping("/{id}")
+    @VendedorOnly
+    @Operation(
+            summary = "Deletar produto específico",
+            description = "Deleta um produto específico do vendedor autenticado. Somente o vendedor dono do produto pode realizar esta operação."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Produto deletado com sucesso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token ausente, inválido ou expirado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            )})
+    public ResponseEntity<ApiResponse<ProdutoEspecificoOutputDto>> deletarProdutoEspecifico(
+            @Parameter(description = "Identificador do produto específico", required = true) @PathVariable Long id) {
+        ProdutoEspecificoOutputDto output = produtoEspecificoService.deletarProdutoEspecifico(id);
+        return ResponseEntity.ok().body(new ApiResponse<>(output, "Produto deletado com sucesso!"));
     }
 }
