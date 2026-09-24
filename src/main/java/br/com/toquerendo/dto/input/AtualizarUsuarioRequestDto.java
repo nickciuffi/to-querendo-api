@@ -22,4 +22,10 @@ public class AtualizarUsuarioRequestDto {
 
     @Schema(description = "ID da praia a qual o usuário está associado", example = "1")
     private Long idPraia;
+
+    @Schema(description = "Descrição do negócio do vendedor", example = "Vendedor de picolés")
+    private String descricao;
+
+    @Schema(description = "indica se um vendedor está online", example = "true")
+    private boolean online;
 }
