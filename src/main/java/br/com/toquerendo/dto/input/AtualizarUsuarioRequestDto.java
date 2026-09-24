@@ -27,5 +27,5 @@ public class AtualizarUsuarioRequestDto {
     private String descricao;
 
     @Schema(description = "indica se um vendedor está online", example = "true")
-    private boolean online;
+    private Boolean online;
 }

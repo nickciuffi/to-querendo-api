@@ -88,11 +88,11 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         if(this.isUsuarioVendedor(usuario.getId())){
             Vendedor vendedor = vendedorRepository.findByUsuarioId(usuario.getId()).get();
-            vendedor.setOnline(req.isOnline());
-            vendedor.setDescricao(req.getDescricao());
+            vendedor.setOnline(req.getOnline() != null ? req.getOnline() : vendedor.getOnline());
+            vendedor.setDescricao(req.getDescricao() != null ? req.getDescricao() : vendedor.getDescricao());
             vendedorRepository.save(vendedor);
-            res.setOnline(req.isOnline());
-            res.setDescricao(req.getDescricao());
+            res.setOnline(vendedor.getOnline());
+            res.setDescricao(vendedor.getDescricao());
         }
 
         return res;
