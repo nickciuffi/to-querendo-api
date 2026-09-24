@@ -16,6 +16,7 @@ import br.com.toquerendo.repository.UsuarioRepository;
 import br.com.toquerendo.repository.VendedorRepository;
 import br.com.toquerendo.service.UsuarioService;
 import br.com.toquerendo.utils.DocumentoUtils;
+import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -83,7 +84,24 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setTelefone(req.getTelefone() != null ? req.getTelefone() : usuario.getTelefone());
         usuario.setUrlFoto(req.getUrlFoto() != null ? req.getUrlFoto() : usuario.getUrlFoto());
 
-        return UsuarioOutputDto.fromEntity(usuarioRepository.save(usuario));
+        UsuarioOutputDto res = UsuarioOutputDto.fromEntity(usuarioRepository.save(usuario));
+
+        if(this.isUsuarioVendedor(usuario.getId())){
+            Vendedor vendedor = vendedorRepository.findByUsuarioId(usuario.getId()).get();
+            vendedor.setOnline(req.isOnline());
+            vendedor.setDescricao(req.getDescricao());
+            vendedorRepository.save(vendedor);
+            res.setOnline(req.isOnline());
+            res.setDescricao(req.getDescricao());
+        }
+
+        return res;
+    }
+
+    private boolean isUsuarioVendedor(Long usuarioId){
+        Optional<Vendedor> vendOpt = vendedorRepository.findByUsuarioId(usuarioId);
+        if(vendOpt.isEmpty()) return false;
+        return SecurityUtils.usuarioPossuiRole("ROLE_VENDEDOR");
     }
 
     public UsuarioOutputDto consultarUsuarioAutenticado() {
