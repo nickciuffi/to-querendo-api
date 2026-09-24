@@ -1,9 +1,8 @@
 package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
-import br.com.toquerendo.dto.output.UpgradeVendedorOutputDto;
+import br.com.toquerendo.dto.output.UsuarioOutputDto;
 import br.com.toquerendo.dto.output.VendedorLocalizacaoProdutosOutputDto;
-import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.entity.Categoria;
 import br.com.toquerendo.entity.Localizacao;
 import br.com.toquerendo.entity.Praia;
@@ -129,13 +128,13 @@ class VendedorServiceImplTest {
         CriarVendedorRequestDto input = new CriarVendedorRequestDto();
         input.setDescricao("Vendedor de água de coco");
 
-        UpgradeVendedorOutputDto output = vendedorService.cadastrarVendedor(input);
+        UsuarioOutputDto output = vendedorService.cadastrarVendedor(input);
 
         ArgumentCaptor<Vendedor> vendedorCaptor = ArgumentCaptor.forClass(Vendedor.class);
         verify(vendedorRepository).save(vendedorCaptor.capture());
         assertThat(vendedorCaptor.getValue().getUsuario()).isEqualTo(usuario);
         assertThat(vendedorCaptor.getValue().getDescricao()).isEqualTo("Vendedor de água de coco");
-        assertThat(vendedorCaptor.getValue().getOnline()).isTrue();
+        assertThat(vendedorCaptor.getValue().getOnline()).isFalse();
 
         ArgumentCaptor<Usuario> usuarioCaptor = ArgumentCaptor.forClass(Usuario.class);
         verify(usuarioRepository).save(usuarioCaptor.capture());
@@ -240,55 +239,6 @@ class VendedorServiceImplTest {
                 .hasMessageContaining("categoria de turista");
 
         verify(vendedorRepository, never()).save(any());
-    }
-
-    // --- obterDadosVendedor ---
-
-    @Test
-    void obterDadosVendedor_comUsuarioComPraia_devePreencherPraiaAtualEQuantidades() {
-        Praia praia = new Praia();
-        praia.setId(1L);
-        praia.setNome("Praia do Forte");
-
-        Usuario usuario = criarUsuarioTuristaApto();
-        usuario.setPraia(praia);
-
-        Vendedor vendedor = criarVendedor(1L, usuario);
-
-        when(vendedorRepository.findByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(vendedor));
-        when(produtoEspecificoRepository.countByVendedorIdAndProdutoAtivoTrue(1L)).thenReturn(3);
-        when(produtoEspecificoRepository.countByVendedorId(1L)).thenReturn(5);
-
-        VendedorOutputDto output = vendedorService.obterDadosVendedor();
-
-        assertThat(output.getPraiaAtual()).isEqualTo("Praia do Forte");
-        assertThat(output.getQtdProdutosAtivos()).isEqualTo(3);
-        assertThat(output.getQtdProdutos()).isEqualTo(5);
-    }
-
-    @Test
-    void obterDadosVendedor_quandoUsuarioSemPraia_devePreencherPraiaAtualComMensagemPadrao() {
-        Usuario usuario = criarUsuarioTuristaApto();
-        usuario.setPraia(null);
-
-        Vendedor vendedor = criarVendedor(1L, usuario);
-
-        when(vendedorRepository.findByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(vendedor));
-        when(produtoEspecificoRepository.countByVendedorIdAndProdutoAtivoTrue(1L)).thenReturn(0);
-        when(produtoEspecificoRepository.countByVendedorId(1L)).thenReturn(0);
-
-        VendedorOutputDto output = vendedorService.obterDadosVendedor();
-
-        assertThat(output.getPraiaAtual()).isEqualTo("Sem praia vinculada");
-    }
-
-    @Test
-    void obterDadosVendedor_quandoVendedorNaoEncontrado_deveLancarRuntimeException() {
-        when(vendedorRepository.findByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> vendedorService.obterDadosVendedor())
-                .isInstanceOf(RuntimeException.class)
-                .hasMessage("Vendedor não encontrado.");
     }
 
     // --- consultarLocalizacaoVendedores ---

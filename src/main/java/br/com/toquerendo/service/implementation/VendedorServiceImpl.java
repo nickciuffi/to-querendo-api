@@ -1,9 +1,8 @@
 package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
-import br.com.toquerendo.dto.output.UpgradeVendedorOutputDto;
+import br.com.toquerendo.dto.output.UsuarioOutputDto;
 import br.com.toquerendo.dto.output.VendedorLocalizacaoProdutosOutputDto;
-import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.entity.*;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
 import br.com.toquerendo.exception.*;
@@ -35,7 +34,7 @@ public class VendedorServiceImpl implements VendedorService {
 
     private JwtService jwtService;
 
-    public UpgradeVendedorOutputDto cadastrarVendedor(CriarVendedorRequestDto criarVendedorRequest) {
+    public UsuarioOutputDto cadastrarVendedor(CriarVendedorRequestDto criarVendedorRequest) {
         String email = SecurityUtils.getEmailUsuarioLogado();
 
         if (vendedorRepository.existsByUsuarioEmail(email)) {
@@ -50,7 +49,7 @@ public class VendedorServiceImpl implements VendedorService {
         Vendedor vendedor = new Vendedor();
         vendedor.setUsuario(usuario);
         vendedor.setDescricao(criarVendedorRequest.getDescricao());
-        vendedor.setOnline(true);
+        vendedor.setOnline(false);
 
         Vendedor vendedorSalvo = vendedorRepository.save(vendedor);
 
@@ -59,25 +58,12 @@ public class VendedorServiceImpl implements VendedorService {
             vendedorSalvo.setUsuario(usuarioRepository.save(usuario));
         }
 
-        UpgradeVendedorOutputDto output = UpgradeVendedorOutputDto.fromEntity(vendedorSalvo);
+        UsuarioOutputDto output = UsuarioOutputDto.fromEntity(vendedorSalvo.getUsuario());
+        output.setDescricao(vendedorSalvo.getDescricao());
+        output.setOnline(vendedorSalvo.getOnline());
         output.setToken(jwtService.gerarToken(output.getEmail(), output.getCategoria().getId()));
 
         return output;
-    }
-
-    public VendedorOutputDto obterDadosVendedor() {
-        String email = SecurityUtils.getEmailUsuarioLogado();
-        Vendedor vendedorEnt = vendedorRepository.findByUsuarioEmail(email)
-                .orElseThrow(() -> new RuntimeException("Vendedor não encontrado."));
-        Usuario usuarioEnt = vendedorEnt.getUsuario();
-
-        VendedorOutputDto vendedor = VendedorOutputDto.fromEntity(vendedorEnt);
-
-        vendedor.setPraiaAtual(usuarioEnt.getPraia() != null ? usuarioEnt.getPraia().getNome() : "Sem praia vinculada");
-        vendedor.setQtdProdutosAtivos(produtoEspecificoRepository.countByVendedorIdAndProdutoAtivoTrue(vendedorEnt.getId()));
-        vendedor.setQtdProdutos(produtoEspecificoRepository.countByVendedorId(vendedorEnt.getId()));
-
-        return vendedor;
     }
 
     public List<VendedorLocalizacaoProdutosOutputDto> consultarLocalizacaoVendedores(Long idProdutoBase, Long idPraia) {

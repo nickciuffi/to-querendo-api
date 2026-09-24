@@ -34,4 +34,6 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Long> {
             "and pe.vendedor.usuario.praia.id = :idPraia")
     List<Vendedor> findAllVendedoresOnlinePorPraiaComAlgumProduto(@Param("idPraia") Long idPraia);
 
+    Optional<Vendedor> findByUsuarioId(Long usuarioId);
+
 }

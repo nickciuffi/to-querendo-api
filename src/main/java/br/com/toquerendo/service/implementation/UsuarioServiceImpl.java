@@ -3,9 +3,9 @@ package br.com.toquerendo.service.implementation;
 import br.com.toquerendo.dto.input.AtualizarUsuarioRequestDto;
 import br.com.toquerendo.dto.input.CadastroUsuarioRequestDto;
 import br.com.toquerendo.dto.output.UsuarioOutputDto;
-import br.com.toquerendo.entity.Categoria;
 import br.com.toquerendo.entity.Praia;
 import br.com.toquerendo.entity.Usuario;
+import br.com.toquerendo.entity.Vendedor;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
 import br.com.toquerendo.exception.CpfJaCadastradoException;
 import br.com.toquerendo.exception.EmailJaCadastradoException;
@@ -13,6 +13,7 @@ import br.com.toquerendo.exception.RuntimeApiException;
 import br.com.toquerendo.exception.UsuarioNaoAutorizadoException;
 import br.com.toquerendo.repository.PraiaRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
+import br.com.toquerendo.repository.VendedorRepository;
 import br.com.toquerendo.service.UsuarioService;
 import br.com.toquerendo.utils.DocumentoUtils;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -32,6 +34,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     private PraiaRepository praiaRepository;
 
     private PasswordEncoder passwordEncoder;
+
+    private VendedorRepository vendedorRepository;
 
     public UsuarioOutputDto cadastrarUsuario(CadastroUsuarioRequestDto cadastroRequest) {
 
@@ -84,7 +88,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     public UsuarioOutputDto consultarUsuarioAutenticado() {
         Usuario userEnt = buscarUsuarioAutenticado();
-        return UsuarioOutputDto.fromEntity(userEnt);
+        Optional<Vendedor> vendedorOpt = vendedorRepository.findByUsuarioId(userEnt.getId());
+
+        UsuarioOutputDto output = UsuarioOutputDto.fromEntity(userEnt);
+        if(vendedorOpt.isPresent()){
+            Vendedor vend = vendedorOpt.get();
+            output.setOnline(vend.getOnline());
+            output.setDescricao(vend.getDescricao());
+        }
+        return output;
     }
 
     private Usuario buscarUsuarioAutenticado() {

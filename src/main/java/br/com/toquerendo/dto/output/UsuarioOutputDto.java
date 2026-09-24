@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UsuarioOutputDto {
 
     @Schema(description = "Email do usuário", example = "usuario@email.com")
@@ -28,18 +29,29 @@ public class UsuarioOutputDto {
     private String urlFoto;
 
     @Schema(description = "Praia atual do usuário", example = "Praia do Forte")
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     private PraiaOutputDto praiaAtual;
 
     @Schema(description = "Categoria do usuário", example = "Vendedor")
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     private CategoriaOutputDto categoria;
+
+    @Schema(description = "Refresh de token com a role de vendedor")
+    private String token;
+
+    @Schema(description = "Descrição do vendedor, exibida aos clientes", example = "Vendedor de picolés artesanais na orla")
+    private String descricao;
+
+    @Schema(description = "Indica se o vendedor está online e disponível para venda", example = "false")
+    private Boolean online;
 
     public static UsuarioOutputDto fromEntity(Usuario usuario) {
         return UsuarioOutputDto.builder()
                 .email(usuario.getEmail())
                 .nome(usuario.getNome())
-                .telefone(usuario.getTelefone())
-                .cpf(usuario.getCpf())
-                .urlFoto(usuario.getUrlFoto())
+                .telefone(usuario.getTelefone() != null ? usuario.getTelefone() : "")
+                .cpf(usuario.getCpf() != null ? usuario.getCpf() : "")
+                .urlFoto(usuario.getUrlFoto() != null ? usuario.getUrlFoto() : "")
                 .praiaAtual(PraiaOutputDto.fromEntity(usuario.getPraia()))
                 .categoria(CategoriaOutputDto.fromEntity(usuario.getCategoria()))
                 .build();
