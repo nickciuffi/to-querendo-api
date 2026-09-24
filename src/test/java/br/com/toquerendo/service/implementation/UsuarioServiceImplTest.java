@@ -6,6 +6,7 @@ import br.com.toquerendo.entity.Praia;
 import br.com.toquerendo.entity.Usuario;
 import br.com.toquerendo.exception.UsuarioNaoAutorizadoException;
 import br.com.toquerendo.repository.UsuarioRepository;
+import br.com.toquerendo.repository.VendedorRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +34,9 @@ class UsuarioServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private VendedorRepository vendedorRepository;
 
     @InjectMocks
     private UsuarioServiceImpl usuarioService;
