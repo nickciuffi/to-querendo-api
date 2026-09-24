@@ -2,6 +2,7 @@ package br.com.toquerendo.controller;
 
 import br.com.toquerendo.dto.ApiResponse;
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
+import br.com.toquerendo.dto.output.UpgradeVendedorOutputDto;
 import br.com.toquerendo.dto.output.VendedorLocalizacaoProdutosOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.security.annotation.TuristaOnly;
@@ -59,8 +60,8 @@ public class VendedorController {
                             schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    ResponseEntity<ApiResponse<VendedorOutputDto>> cadastrarVendedor(@Valid @RequestBody CriarVendedorRequestDto criarVendedorRequest) {
-        VendedorOutputDto output = vendedorService.cadastrarVendedor(criarVendedorRequest);
+    ResponseEntity<ApiResponse<UpgradeVendedorOutputDto>> cadastrarVendedor(@Valid @RequestBody CriarVendedorRequestDto criarVendedorRequest) {
+        UpgradeVendedorOutputDto output = vendedorService.cadastrarVendedor(criarVendedorRequest);
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Vendedor cadastrado com sucesso!"));
     }
 

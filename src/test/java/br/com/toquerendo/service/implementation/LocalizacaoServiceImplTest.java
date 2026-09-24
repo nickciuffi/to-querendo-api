@@ -70,7 +70,7 @@ class LocalizacaoServiceImplTest {
     void atualizarLocalizacao_quandoUsuarioAindaNaoTemLocalizacao_deveCriarNova() {
         Usuario usuario = criarUsuario(1L);
 
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
         when(localizacaoRepository.findById(1L)).thenReturn(Optional.empty());
         when(localizacaoRepository.save(any(Localizacao.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -97,7 +97,7 @@ class LocalizacaoServiceImplTest {
         localizacaoExistente.setLatitude(BigDecimal.valueOf(-22.0));
         localizacaoExistente.setLongitude(BigDecimal.valueOf(-45.0));
 
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
         when(localizacaoRepository.findById(1L)).thenReturn(Optional.of(localizacaoExistente));
         when(localizacaoRepository.save(any(Localizacao.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -110,7 +110,7 @@ class LocalizacaoServiceImplTest {
 
     @Test
     void atualizarLocalizacao_quandoUsuarioLogadoNaoEncontrado_deveLancarRuntimeException() {
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> localizacaoService.atualizarLocalizacao(criarInput()))
                 .isInstanceOf(RuntimeException.class)

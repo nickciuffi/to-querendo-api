@@ -1,12 +1,14 @@
 package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
+import br.com.toquerendo.dto.output.UpgradeVendedorOutputDto;
 import br.com.toquerendo.dto.output.VendedorLocalizacaoProdutosOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.entity.*;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
 import br.com.toquerendo.exception.*;
 import br.com.toquerendo.repository.*;
+import br.com.toquerendo.security.JwtService;
 import br.com.toquerendo.service.VendedorService;
 import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
@@ -31,14 +33,16 @@ public class VendedorServiceImpl implements VendedorService {
 
     private LocalizacaoRepository localizacaoRepository;
 
-    public VendedorOutputDto cadastrarVendedor(CriarVendedorRequestDto criarVendedorRequest) {
+    private JwtService jwtService;
+
+    public UpgradeVendedorOutputDto cadastrarVendedor(CriarVendedorRequestDto criarVendedorRequest) {
         String email = SecurityUtils.getEmailUsuarioLogado();
 
         if (vendedorRepository.existsByUsuarioEmail(email)) {
             throw new VendedorJaCadastradoException();
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByEmailAndContaAtivaTrue(email)
                 .orElseThrow(() -> new RuntimeApiException("Usuário não encontrado."));
 
         this.verificarSeUsuarioPodeSerVendedor(usuario);
@@ -52,10 +56,13 @@ public class VendedorServiceImpl implements VendedorService {
 
         if(!usuario.getCategoria().getId().equals(CategoriaUsuarioEnum.ADMINISTRADOR.getId())) {
             usuario.setCategoriaId(CategoriaUsuarioEnum.VENDEDOR.getId());
-            usuarioRepository.save(usuario);
+            vendedorSalvo.setUsuario(usuarioRepository.save(usuario));
         }
 
-        return VendedorOutputDto.fromEntity(vendedorSalvo);
+        UpgradeVendedorOutputDto output = UpgradeVendedorOutputDto.fromEntity(vendedorSalvo);
+        output.setToken(jwtService.gerarToken(output.getEmail(), output.getCategoria().getId()));
+
+        return output;
     }
 
     public VendedorOutputDto obterDadosVendedor() {

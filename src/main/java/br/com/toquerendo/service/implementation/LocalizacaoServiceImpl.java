@@ -51,7 +51,7 @@ public class LocalizacaoServiceImpl implements LocalizacaoService {
 
     private Usuario buscarUsuarioLogado() {
         String email = SecurityUtils.getEmailUsuarioLogado();
-        return usuarioRepository.findByEmail(email)
+        return usuarioRepository.findByEmailAndContaAtivaTrue(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
     }
 }

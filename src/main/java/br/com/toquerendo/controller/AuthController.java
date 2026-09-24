@@ -59,7 +59,7 @@ public class AuthController {
             )
     })
     ResponseEntity<ApiResponse<LoginResponseDto>> login(@Valid @RequestBody LoginRequestDto loginRequest) {
-        Usuario usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
+        Usuario usuario = usuarioRepository.findByEmailAndContaAtivaTrue(loginRequest.getEmail())
                 .orElseThrow(CredenciaisInvalidasException::new);
 
         if (!passwordEncoder.matches(loginRequest.getSenha(), usuario.getSenha())) {
