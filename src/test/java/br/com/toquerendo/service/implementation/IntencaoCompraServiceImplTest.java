@@ -132,7 +132,7 @@ class IntencaoCompraServiceImplTest {
         Usuario usuario = criarUsuario(1L);
         ProdutoBase produtoBase = criarProdutoBase(10L);
 
-        when(usuarioRepository.findByEmail(EMAIL_TURISTA_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_TURISTA_LOGADO)).thenReturn(Optional.of(usuario));
         when(produtoBaseRepository.findByIdAndEstaAtivoTrue(10L)).thenReturn(Optional.of(produtoBase));
         when(intencaoCompraRepository.save(any(IntencaoCompra.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -164,7 +164,7 @@ class IntencaoCompraServiceImplTest {
 
     @Test
     void criarIntencaoCompra_quandoProdutoBaseNaoEncontradoOuInativo_deveLancarProdutoNaoEncontradoException() {
-        when(usuarioRepository.findByEmail(EMAIL_TURISTA_LOGADO)).thenReturn(Optional.of(criarUsuario(1L)));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_TURISTA_LOGADO)).thenReturn(Optional.of(criarUsuario(1L)));
         when(produtoBaseRepository.findByIdAndEstaAtivoTrue(10L)).thenReturn(Optional.empty());
 
         CriarIntencaoCompraInputDto input = new CriarIntencaoCompraInputDto();
@@ -178,7 +178,7 @@ class IntencaoCompraServiceImplTest {
 
     @Test
     void criarIntencaoCompra_quandoUsuarioLogadoNaoEncontrado_deveLancarRuntimeException() {
-        when(usuarioRepository.findByEmail(EMAIL_TURISTA_LOGADO)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_TURISTA_LOGADO)).thenReturn(Optional.empty());
 
         CriarIntencaoCompraInputDto input = new CriarIntencaoCompraInputDto();
         input.setIdProdutoBase(10L);

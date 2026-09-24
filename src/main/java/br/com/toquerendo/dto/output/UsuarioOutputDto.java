@@ -18,17 +18,14 @@ public class UsuarioOutputDto {
     @Schema(description = "Nome completo do usuário", example = "João da Silva")
     private String nome;
 
-    @Schema(description = "Telefone de contato do usuário", example = "11999999999")
-    private String telefone;
-
     @Schema(description = "CPF do usuário", example = "12345678900")
     private String cpf;
 
+    @Schema(description = "Telefone de contato do usuário", example = "11999999999")
+    private String telefone;
+
     @Schema(description = "URL da foto de perfil do usuário", example = "https://exemplo.com/foto.jpg")
     private String urlFoto;
-
-    @Schema(description = "Indica se a conta do usuário está ativa", example = "true")
-    private Boolean contaAtiva;
 
     @Schema(description = "Praia atual do usuário", example = "Praia do Forte")
     private PraiaOutputDto praiaAtual;
@@ -42,7 +39,6 @@ public class UsuarioOutputDto {
                 .nome(usuario.getNome())
                 .telefone(usuario.getTelefone())
                 .cpf(usuario.getCpf())
-                .contaAtiva(usuario.getContaAtiva())
                 .urlFoto(usuario.getUrlFoto())
                 .praiaAtual(PraiaOutputDto.fromEntity(usuario.getPraia()))
                 .categoria(CategoriaOutputDto.fromEntity(usuario.getCategoria()))

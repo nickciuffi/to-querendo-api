@@ -68,7 +68,7 @@ class UsuarioServiceImplTest {
         praia.setNome("Praia do Forte");
         usuario.setPraia(praia);
 
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
 
         UsuarioOutputDto output = usuarioService.consultarUsuarioAutenticado();
 
@@ -83,7 +83,7 @@ class UsuarioServiceImplTest {
         autenticarUsuario(EMAIL_USUARIO_LOGADO);
 
         Usuario usuario = criarUsuario();
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
 
         UsuarioOutputDto output = usuarioService.consultarUsuarioAutenticado();
 
@@ -102,7 +102,7 @@ class UsuarioServiceImplTest {
     @Test
     void consultarUsuarioAutenticado_quandoEmailDoTokenNaoCorrespondeAUsuarioCadastrado_deveLancarRuntimeException() {
         autenticarUsuario(EMAIL_USUARIO_LOGADO);
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> usuarioService.consultarUsuarioAutenticado())
                 .isInstanceOf(RuntimeException.class)
@@ -115,7 +115,7 @@ class UsuarioServiceImplTest {
         Usuario outroUsuario = new Usuario();
         outroUsuario.setEmail("outro-usuario@email.com");
         outroUsuario.setNome("Outro Usuário");
-        when(usuarioRepository.findByEmail("outro-usuario@email.com")).thenReturn(Optional.of(outroUsuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue("outro-usuario@email.com")).thenReturn(Optional.of(outroUsuario));
 
         UsuarioOutputDto output = usuarioService.consultarUsuarioAutenticado();
 

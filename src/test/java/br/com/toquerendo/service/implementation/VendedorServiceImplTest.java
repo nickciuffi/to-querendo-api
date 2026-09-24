@@ -1,6 +1,7 @@
 package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.input.CriarVendedorRequestDto;
+import br.com.toquerendo.dto.output.UpgradeVendedorOutputDto;
 import br.com.toquerendo.dto.output.VendedorLocalizacaoProdutosOutputDto;
 import br.com.toquerendo.dto.output.VendedorOutputDto;
 import br.com.toquerendo.entity.Categoria;
@@ -20,6 +21,7 @@ import br.com.toquerendo.repository.ProdutoBaseRepository;
 import br.com.toquerendo.repository.ProdutoEspecificoRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
 import br.com.toquerendo.repository.VendedorRepository;
+import br.com.toquerendo.security.JwtService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -63,6 +65,9 @@ class VendedorServiceImplTest {
 
     @Mock
     private LocalizacaoRepository localizacaoRepository;
+
+    @Mock
+    private JwtService jwtService;
 
     @InjectMocks
     private VendedorServiceImpl vendedorService;
@@ -109,17 +114,22 @@ class VendedorServiceImplTest {
         Usuario usuario = criarUsuarioTuristaApto();
 
         when(vendedorRepository.existsByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(false);
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
         when(vendedorRepository.save(any(Vendedor.class))).thenAnswer(invocation -> {
             Vendedor vendedor = invocation.getArgument(0);
             vendedor.setId(1L);
             return vendedor;
         });
+        when(usuarioRepository.save(any())).thenAnswer(invocation -> {
+            Usuario us = invocation.getArgument(0);
+            usuario.setId(1L);
+            return usuario;
+        });
 
         CriarVendedorRequestDto input = new CriarVendedorRequestDto();
         input.setDescricao("Vendedor de água de coco");
 
-        VendedorOutputDto output = vendedorService.cadastrarVendedor(input);
+        UpgradeVendedorOutputDto output = vendedorService.cadastrarVendedor(input);
 
         ArgumentCaptor<Vendedor> vendedorCaptor = ArgumentCaptor.forClass(Vendedor.class);
         verify(vendedorRepository).save(vendedorCaptor.capture());
@@ -131,8 +141,8 @@ class VendedorServiceImplTest {
         verify(usuarioRepository).save(usuarioCaptor.capture());
         assertThat(usuarioCaptor.getValue().getCategoria().getId()).isEqualTo(CategoriaUsuarioEnum.VENDEDOR.getId());
 
-        assertThat(output.getId()).isEqualTo(1L);
-        assertThat(output.getUsuarioEmail()).isEqualTo(EMAIL_USUARIO_LOGADO);
+        assertThat(output.getCategoria().getId()).isEqualTo(CategoriaUsuarioEnum.VENDEDOR.getId());
+        assertThat(output.getEmail()).isEqualTo(EMAIL_USUARIO_LOGADO);
     }
 
     @Test
@@ -144,14 +154,14 @@ class VendedorServiceImplTest {
         assertThatThrownBy(() -> vendedorService.cadastrarVendedor(input))
                 .isInstanceOf(VendedorJaCadastradoException.class);
 
-        verify(usuarioRepository, never()).findByEmail(any());
+        verify(usuarioRepository, never()).findByEmailAndContaAtivaTrue(any());
         verify(vendedorRepository, never()).save(any());
     }
 
     @Test
     void cadastrarVendedor_quandoUsuarioNaoEncontrado_deveLancarRuntimeException() {
         when(vendedorRepository.existsByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(false);
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.empty());
 
         CriarVendedorRequestDto input = new CriarVendedorRequestDto();
 
@@ -168,7 +178,7 @@ class VendedorServiceImplTest {
         usuario.setTelefone(null);
 
         when(vendedorRepository.existsByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(false);
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
 
         CriarVendedorRequestDto input = new CriarVendedorRequestDto();
 
@@ -185,7 +195,7 @@ class VendedorServiceImplTest {
         usuario.setCpf(null);
 
         when(vendedorRepository.existsByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(false);
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
 
         CriarVendedorRequestDto input = new CriarVendedorRequestDto();
 
@@ -202,7 +212,7 @@ class VendedorServiceImplTest {
         usuario.setContaAtiva(false);
 
         when(vendedorRepository.existsByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(false);
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
 
         CriarVendedorRequestDto input = new CriarVendedorRequestDto();
 
@@ -221,7 +231,7 @@ class VendedorServiceImplTest {
         usuario.setCategoria(categoriaVendedor);
 
         when(vendedorRepository.existsByUsuarioEmail(EMAIL_USUARIO_LOGADO)).thenReturn(false);
-        when(usuarioRepository.findByEmail(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
 
         CriarVendedorRequestDto input = new CriarVendedorRequestDto();
 

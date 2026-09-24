@@ -95,7 +95,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
         String email = authentication.getName();
 
-        return usuarioRepository.findByEmail(email)
+        return usuarioRepository.findByEmailAndContaAtivaTrue(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
     }
 }
