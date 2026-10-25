@@ -1,5 +1,6 @@
 package br.com.toquerendo.controller;
 
+import br.com.toquerendo.dto.input.ConcluirIntencaoCompraInputDto;
 import br.com.toquerendo.dto.input.CriarIntencaoCompraInputDto;
 import br.com.toquerendo.dto.output.IntencaoCompraOutputDto;
 import br.com.toquerendo.security.JwtService;
@@ -20,6 +21,7 @@ import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -101,6 +103,40 @@ class IntencaoCompraControllerSecurityTest {
     @WithMockUser(roles = "ADMIN")
     void consultarBanhistasComIntencaoDeCompra_comRoleAdmin_deveSerNegado() throws Exception {
         mockMvc.perform(get("/intencao-compra/banhistas"))
+                .andExpect(status().isForbidden());
+    }
+
+    private String criarCorpoConclusaoValido() throws Exception {
+        ConcluirIntencaoCompraInputDto input = new ConcluirIntencaoCompraInputDto();
+        input.setIdProdutoBase(10L);
+        input.setMotivo("Desisti");
+        return objectMapper.writeValueAsString(input);
+    }
+
+    @Test
+    @WithMockUser(roles = "TURISTA")
+    void concluirIntencaoCompra_comRoleTurista_deveSerPermitido() throws Exception {
+        mockMvc.perform(delete("/intencao-compra")
+                        .contentType("application/json")
+                        .content(criarCorpoConclusaoValido()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "VENDEDOR")
+    void concluirIntencaoCompra_comRoleVendedorSemTurista_deveSerNegado() throws Exception {
+        mockMvc.perform(delete("/intencao-compra")
+                        .contentType("application/json")
+                        .content(criarCorpoConclusaoValido()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void concluirIntencaoCompra_comRoleAdmin_deveSerNegado() throws Exception {
+        mockMvc.perform(delete("/intencao-compra")
+                        .contentType("application/json")
+                        .content(criarCorpoConclusaoValido()))
                 .andExpect(status().isForbidden());
     }
 

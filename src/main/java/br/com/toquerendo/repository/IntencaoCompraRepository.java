@@ -28,4 +28,14 @@ public interface IntencaoCompraRepository extends JpaRepository<IntencaoCompra, 
             "and ic.estaAtivo = true " +
             "order by ic.tsCriacaoIntencao desc")
     List<IntencaoCompra> findAllByUsuarioEmail(@Param("email") String email);
+
+    @Query("select ic from IntencaoCompra ic " +
+            "join fetch ic.usuario u " +
+            "join fetch ic.produtoBase pb " +
+            "where u.email = :email " +
+            "and pb.id = :idProdutoBase " +
+            "and ic.estaAtivo = true")
+    List<IntencaoCompra> findAllAtivasByUsuarioEmailAndProdutoBaseId(
+            @Param("email") String email,
+            @Param("idProdutoBase") Long idProdutoBase);
 }

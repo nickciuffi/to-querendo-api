@@ -38,4 +38,7 @@ public class IntencaoCompra {
 
     @Column(name = "esta_ativo", nullable = false)
     private Boolean estaAtivo;
+
+    @Column(name = "motivo_conclusao", length = 200)
+    private String motivoConclusao;
 }

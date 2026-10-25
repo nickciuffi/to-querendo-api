@@ -1,5 +1,6 @@
 package br.com.toquerendo.service;
 
+import br.com.toquerendo.dto.input.ConcluirIntencaoCompraInputDto;
 import br.com.toquerendo.dto.input.CriarIntencaoCompraInputDto;
 import br.com.toquerendo.dto.output.BanhistaComIntencoesOutputDto;
 import br.com.toquerendo.dto.output.IntencaoCompraOutputDto;
@@ -13,4 +14,6 @@ public interface IntencaoCompraService {
     List<BanhistaComIntencoesOutputDto> consultarBanhistasComIntencaoDeCompra();
 
     List<IntencaoCompraOutputDto> consultarIntencoesCompraBanhista();
+
+    void concluirIntencaoCompra(ConcluirIntencaoCompraInputDto input);
 }

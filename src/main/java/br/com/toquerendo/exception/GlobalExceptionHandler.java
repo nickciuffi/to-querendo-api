@@ -34,6 +34,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
     }
 
+    @ExceptionHandler(IntencaoCompraNaoEncontradaException.class)
+    public ResponseEntity<ApiResponse<Object>> handleIntencaoCompraNaoEncontradaException(IntencaoCompraNaoEncontradaException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
+    }
+
     @ExceptionHandler(NenhumaSimulacaoEncontradaException.class)
     public ResponseEntity<ApiResponse<Object>> handleProdutoNaoEncontradoException(NenhumaSimulacaoEncontradaException e) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(e.getMessage()));
@@ -143,6 +148,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<ApiResponse<Object>> handleExpiredJwtException(ExpiredJwtException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse<>("Token expirado."));
+    }
+
+    @ExceptionHandler(IntencaoCompraJaExistente.class)
+    public ResponseEntity<ApiResponse<Object>> handleIntencaoCompraJaExistente(IntencaoCompraJaExistente e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(e.getMessage()));
     }
 
 }

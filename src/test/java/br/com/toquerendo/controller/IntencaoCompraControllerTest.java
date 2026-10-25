@@ -1,9 +1,11 @@
 package br.com.toquerendo.controller;
 
+import br.com.toquerendo.dto.input.ConcluirIntencaoCompraInputDto;
 import br.com.toquerendo.dto.input.CriarIntencaoCompraInputDto;
 import br.com.toquerendo.dto.output.BanhistaComIntencoesOutputDto;
 import br.com.toquerendo.dto.output.IntencaoCompraOutputDto;
 import br.com.toquerendo.exception.GlobalExceptionHandler;
+import br.com.toquerendo.exception.IntencaoCompraNaoEncontradaException;
 import br.com.toquerendo.exception.ProdutoNaoEncontradoException;
 import br.com.toquerendo.service.implementation.IntencaoCompraServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,13 +15,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -129,5 +136,85 @@ class IntencaoCompraControllerTest {
         mockMvc.perform(get("/intencao-compra/banhistas"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response").isEmpty());
+    }
+
+    private ConcluirIntencaoCompraInputDto criarInputConclusaoValido() {
+        ConcluirIntencaoCompraInputDto input = new ConcluirIntencaoCompraInputDto();
+        input.setIdProdutoBase(10L);
+        input.setMotivo("Já comprei");
+        return input;
+    }
+
+    private ResultActions concluir(ConcluirIntencaoCompraInputDto input) throws Exception {
+        return mockMvc.perform(delete("/intencao-compra")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(input)));
+    }
+
+    @Test
+    void concluirIntencaoCompra_comDadosValidos_deveRetornar200EChamarServico() throws Exception {
+        concluir(criarInputConclusaoValido())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.messages[0]").value("Intenção de compra concluída com sucesso!"));
+
+        verify(intencaoCompraService).concluirIntencaoCompra(any(ConcluirIntencaoCompraInputDto.class));
+    }
+
+    @Test
+    void concluirIntencaoCompra_semIdProdutoBase_deveRetornar400() throws Exception {
+        ConcluirIntencaoCompraInputDto input = criarInputConclusaoValido();
+        input.setIdProdutoBase(null);
+
+        concluir(input)
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.messages[1]").value("idProdutoBase: O id do produto base é obrigatório"));
+
+        verify(intencaoCompraService, never()).concluirIntencaoCompra(any());
+    }
+
+    @Test
+    void concluirIntencaoCompra_semMotivo_deveRetornar400() throws Exception {
+        ConcluirIntencaoCompraInputDto input = criarInputConclusaoValido();
+        input.setMotivo(null);
+
+        concluir(input).andExpect(status().isBadRequest());
+
+        verify(intencaoCompraService, never()).concluirIntencaoCompra(any());
+    }
+
+    @Test
+    void concluirIntencaoCompra_comMotivoEmBranco_deveRetornar400() throws Exception {
+        ConcluirIntencaoCompraInputDto input = criarInputConclusaoValido();
+        input.setMotivo("   ");
+
+        concluir(input).andExpect(status().isBadRequest());
+
+        verify(intencaoCompraService, never()).concluirIntencaoCompra(any());
+    }
+
+    @Test
+    void concluirIntencaoCompra_comMotivoMaiorQue200Caracteres_deveRetornar400() throws Exception {
+        ConcluirIntencaoCompraInputDto input = criarInputConclusaoValido();
+        input.setMotivo("a".repeat(201));
+
+        concluir(input).andExpect(status().isBadRequest());
+
+        verify(intencaoCompraService, never()).concluirIntencaoCompra(any());
+    }
+
+    @Test
+    void concluirIntencaoCompra_comMotivoDe200Caracteres_deveRetornar200() throws Exception {
+        ConcluirIntencaoCompraInputDto input = criarInputConclusaoValido();
+        input.setMotivo("a".repeat(200));
+
+        concluir(input).andExpect(status().isOk());
+    }
+
+    @Test
+    void concluirIntencaoCompra_quandoNaoHaIntencaoAtiva_deveRetornar404() throws Exception {
+        doThrow(new IntencaoCompraNaoEncontradaException())
+                .when(intencaoCompraService).concluirIntencaoCompra(any());
+
+        concluir(criarInputConclusaoValido()).andExpect(status().isNotFound());
     }
 }
