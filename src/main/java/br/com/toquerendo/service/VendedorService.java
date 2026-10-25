@@ -10,5 +10,5 @@ public interface VendedorService {
 
     UsuarioOutputDto cadastrarVendedor(CriarVendedorRequestDto criarVendedorRequest);
 
-    List<VendedorLocalizacaoProdutosOutputDto> consultarLocalizacaoVendedores(Long idProdutoBase, Long idPraia);
+    List<VendedorLocalizacaoProdutosOutputDto> consultarLocalizacaoVendedores(String idsProdutosBase, Long idPraia);
 }

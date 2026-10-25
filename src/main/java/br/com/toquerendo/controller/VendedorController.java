@@ -66,10 +66,11 @@ public class VendedorController {
     @GetMapping("/localizacao")
     @TuristaOnly
     @Operation(
-            summary = "Consultar localização dos vendedores online de um produto base em uma praia",
-            description = "Retorna a localização atual de todos os vendedores online com produtos ativos do produto base "
-                    + "informado, filtrados pela praia informada, permitindo acompanhar múltiplos vendedores do mesmo "
-                    + "produto ao mesmo tempo. Restrito a usuários com a role de turista ou vendedor."
+            summary = "Consultar localização dos vendedores online de uma praia, filtrando por produtos base",
+            description = "Retorna a localização atual dos vendedores online da praia informada que possuam produto ativo de "
+                    + "qualquer um dos produtos base informados em idsProdutosBase (ex.: \"3,2,6\"). Valores não numéricos e "
+                    + "repetidos são ignorados. Se idsProdutosBase for omitido ou vazio, não filtra por produto base e retorna "
+                    + "todos os vendedores online da praia com algum produto ativo. Restrito a usuários com a role de turista ou vendedor."
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -96,10 +97,10 @@ public class VendedorController {
             )
     })
     public ResponseEntity<ApiResponse<List<VendedorLocalizacaoProdutosOutputDto>>> consultarLocalizacaoVendedores(
-            @Parameter(description = "Identificador do produto base", required = false) @RequestParam(required = false) Long idProdutoBase,
+            @Parameter(description = "Identificadores dos produtos base separados por vírgula (ex.: 3,2,6). Opcional.", required = false, example = "3,2,6") @RequestParam(required = false) String idsProdutosBase,
             @Parameter(description = "Identificador da praia", required = true) @RequestParam Long idPraia) {
         List<VendedorLocalizacaoProdutosOutputDto> vendedores =
-                vendedorService.consultarLocalizacaoVendedores(idProdutoBase, idPraia);
+                vendedorService.consultarLocalizacaoVendedores(idsProdutosBase, idPraia);
         return ResponseEntity.ok().body(new ApiResponse<>(vendedores, "Localizações consultadas com sucesso!"));
     }
 }

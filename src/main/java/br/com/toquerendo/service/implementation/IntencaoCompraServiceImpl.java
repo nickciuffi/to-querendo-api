@@ -1,5 +1,6 @@
 package br.com.toquerendo.service.implementation;
 
+import br.com.toquerendo.dto.input.ConcluirIntencaoCompraInputDto;
 import br.com.toquerendo.dto.input.CriarIntencaoCompraInputDto;
 import br.com.toquerendo.dto.output.BanhistaComIntencoesOutputDto;
 import br.com.toquerendo.dto.output.IntencaoCompraOutputDto;
@@ -9,6 +10,8 @@ import br.com.toquerendo.entity.ProdutoBase;
 import br.com.toquerendo.entity.Usuario;
 import br.com.toquerendo.entity.Vendedor;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
+import br.com.toquerendo.exception.IntencaoCompraJaExistente;
+import br.com.toquerendo.exception.IntencaoCompraNaoEncontradaException;
 import br.com.toquerendo.exception.ProdutoNaoEncontradoException;
 import br.com.toquerendo.repository.IntencaoCompraRepository;
 import br.com.toquerendo.repository.ProdutoBaseRepository;
@@ -46,6 +49,10 @@ public class IntencaoCompraServiceImpl implements IntencaoCompraService {
 
         ProdutoBase produtoBase = produtoBaseRepository.findByIdAndEstaAtivoTrue(input.getIdProdutoBase())
                 .orElseThrow(ProdutoNaoEncontradoException::new);
+
+        List<IntencaoCompra> intencoes =
+                intencaoCompraRepository.findAllAtivasByUsuarioEmailAndProdutoBaseId(usuario.getEmail(), input.getIdProdutoBase());
+        if(!intencoes.isEmpty()) throw new IntencaoCompraJaExistente(produtoBase.getNome());
 
         IntencaoCompra intencaoCompra = new IntencaoCompra();
         intencaoCompra.setUsuario(usuario);
@@ -101,6 +108,26 @@ public class IntencaoCompraServiceImpl implements IntencaoCompraService {
         return intencaoCompraRepository.findAllByUsuarioEmail(email).stream()
                 .map(IntencaoCompraOutputDto::fromEntity)
                 .toList();
+    }
+
+    @Transactional
+    public void concluirIntencaoCompra(ConcluirIntencaoCompraInputDto input) {
+        String email = SecurityUtils.getEmailUsuarioLogado();
+        List<IntencaoCompra> intencoes =
+                intencaoCompraRepository.findAllAtivasByUsuarioEmailAndProdutoBaseId(email, input.getIdProdutoBase());
+
+        if (intencoes.isEmpty()) {
+            throw new IntencaoCompraNaoEncontradaException();
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        intencoes.forEach(intencao -> {
+            intencao.setEstaAtivo(false);
+            intencao.setTsConclusaoIntencao(agora);
+            intencao.setMotivoConclusao(input.getMotivo().trim());
+        });
+
+        intencaoCompraRepository.saveAll(intencoes);
     }
 
     private Usuario buscarUsuarioLogado() {

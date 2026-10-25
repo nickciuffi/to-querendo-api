@@ -1,6 +1,7 @@
 package br.com.toquerendo.controller;
 
 import br.com.toquerendo.dto.ApiResponse;
+import br.com.toquerendo.dto.input.ConcluirIntencaoCompraInputDto;
 import br.com.toquerendo.dto.input.CriarIntencaoCompraInputDto;
 import br.com.toquerendo.dto.output.BanhistaComIntencoesOutputDto;
 import br.com.toquerendo.dto.output.IntencaoCompraOutputDto;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -134,5 +136,49 @@ public class IntencaoCompraController {
     public ResponseEntity<ApiResponse<List<IntencaoCompraOutputDto>>> consultarIntencoesCompraBanhista() {
         List<IntencaoCompraOutputDto> intencoes = intencaoCompraService.consultarIntencoesCompraBanhista();
         return ResponseEntity.ok().body(new ApiResponse<>(intencoes, "Intenções de compra consultadas com sucesso!"));
+    }
+
+    @DeleteMapping("")
+    @TuristaOnly
+    @Operation(
+            summary = "Concluir intenção de compra",
+            description = "Conclui a intenção de compra ativa do turista autenticado para o produto base informado, "
+                    + "registrando o motivo da conclusão. A intenção não é apagada: ela é marcada como inativa e "
+                    + "recebe a data de conclusão. Restrito a usuários com a role de turista."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Intenção de compra concluída com sucesso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "400",
+                    description = "Id do produto base ausente, ou motivo ausente, em branco ou maior que 200 caracteres",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token ausente, inválido ou expirado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado não possui a role de turista",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "404",
+                    description = "Nenhuma intenção de compra ativa do usuário para o produto base informado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    public ResponseEntity<ApiResponse<Void>> concluirIntencaoCompra(
+            @RequestBody @Valid ConcluirIntencaoCompraInputDto input) {
+        intencaoCompraService.concluirIntencaoCompra(input);
+        return ResponseEntity.ok().body(new ApiResponse<>("Intenção de compra concluída com sucesso!"));
     }
 }

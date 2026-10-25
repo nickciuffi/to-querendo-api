@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,8 @@ public interface ProdutoBaseRepository extends JpaRepository<ProdutoBase, Long> 
     List<ProdutoBase> findAllByEstaAtivoTrue();
 
     Optional<ProdutoBase> findByIdAndEstaAtivoTrue(Long id);
+
+    List<ProdutoBase> findAllByIdInAndEstaAtivoTrue(Collection<Long> ids);
 
     @Query("select distinct pe.produtoBase from ProdutoEspecifico pe " +
             "where pe.vendedor.usuario.praia.id = :idPraia " +

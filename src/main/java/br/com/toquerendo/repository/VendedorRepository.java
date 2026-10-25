@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,12 +20,12 @@ public interface VendedorRepository extends JpaRepository<Vendedor, Long> {
     Optional<Vendedor> findByUsuarioEmail(String email);
 
     @Query("select distinct pe.vendedor from ProdutoEspecifico pe " +
-            "where pe.produtoBase.id = :idProdutoBase " +
+            "where pe.produtoBase.id in :idsProdutosBase " +
             "and pe.produtoAtivo = true " +
             "and pe.vendedor.online = true " +
             "and pe.vendedor.usuario.praia.id = :idPraia")
-    List<Vendedor> findAllVendedoresOnlinePorProdutoBaseEPraia(
-            @Param("idProdutoBase") Long idProdutoBase,
+    List<Vendedor> findAllVendedoresOnlinePorProdutosBaseEPraia(
+            @Param("idsProdutosBase") Collection<Long> idsProdutosBase,
             @Param("idPraia") Long idPraia);
 
     @Query("select distinct pe.vendedor from ProdutoEspecifico pe " +

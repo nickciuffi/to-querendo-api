@@ -1,5 +1,6 @@
 package br.com.toquerendo.service.implementation;
 
+import br.com.toquerendo.dto.input.ConcluirIntencaoCompraInputDto;
 import br.com.toquerendo.dto.input.CriarIntencaoCompraInputDto;
 import br.com.toquerendo.dto.output.BanhistaComIntencoesOutputDto;
 import br.com.toquerendo.dto.output.IntencaoCompraOutputDto;
@@ -10,6 +11,7 @@ import br.com.toquerendo.entity.ProdutoEspecifico;
 import br.com.toquerendo.entity.Usuario;
 import br.com.toquerendo.entity.Vendedor;
 import br.com.toquerendo.enums.CategoriaUsuarioEnum;
+import br.com.toquerendo.exception.IntencaoCompraNaoEncontradaException;
 import br.com.toquerendo.exception.ProdutoNaoEncontradoException;
 import br.com.toquerendo.repository.IntencaoCompraRepository;
 import br.com.toquerendo.repository.ProdutoBaseRepository;
@@ -341,4 +343,55 @@ class IntencaoCompraServiceImplTest {
 
         verify(intencaoCompraRepository).findAllByUsuarioEmail(EMAIL_TURISTA_LOGADO);
     }
+
+    private ConcluirIntencaoCompraInputDto criarInputConclusao(Long idProdutoBase, String motivo) {
+        ConcluirIntencaoCompraInputDto input = new ConcluirIntencaoCompraInputDto();
+        input.setIdProdutoBase(idProdutoBase);
+        input.setMotivo(motivo);
+        return input;
+    }
+
+    @Test
+    void concluirIntencaoCompra_deveInativarERegistrarConclusaoEMotivo() {
+        IntencaoCompra intencao = criarIntencaoDeCompra(5L, criarUsuario(1L), criarProdutoBase(10L));
+
+        when(intencaoCompraRepository.findAllAtivasByUsuarioEmailAndProdutoBaseId(EMAIL_TURISTA_LOGADO, 10L))
+                .thenReturn(List.of(intencao));
+
+        intencaoCompraService.concluirIntencaoCompra(criarInputConclusao(10L, "  Já comprei de outro vendedor  "));
+
+        assertThat(intencao.getEstaAtivo()).isFalse();
+        assertThat(intencao.getTsConclusaoIntencao()).isNotNull();
+        assertThat(intencao.getMotivoConclusao()).isEqualTo("Já comprei de outro vendedor");
+        verify(intencaoCompraRepository).saveAll(List.of(intencao));
+    }
+
+    @Test
+    void concluirIntencaoCompra_comMaisDeUmaIntencaoAtiva_deveConcluirTodas() {
+        Usuario usuario = criarUsuario(1L);
+        ProdutoBase produtoBase = criarProdutoBase(10L);
+        IntencaoCompra primeira = criarIntencaoDeCompra(5L, usuario, produtoBase);
+        IntencaoCompra segunda = criarIntencaoDeCompra(6L, usuario, produtoBase);
+
+        when(intencaoCompraRepository.findAllAtivasByUsuarioEmailAndProdutoBaseId(EMAIL_TURISTA_LOGADO, 10L))
+                .thenReturn(List.of(primeira, segunda));
+
+        intencaoCompraService.concluirIntencaoCompra(criarInputConclusao(10L, "Desisti"));
+
+        assertThat(primeira.getEstaAtivo()).isFalse();
+        assertThat(segunda.getEstaAtivo()).isFalse();
+        assertThat(segunda.getMotivoConclusao()).isEqualTo("Desisti");
+    }
+
+    @Test
+    void concluirIntencaoCompra_quandoNaoHaIntencaoAtiva_deveLancarIntencaoCompraNaoEncontradaException() {
+        when(intencaoCompraRepository.findAllAtivasByUsuarioEmailAndProdutoBaseId(EMAIL_TURISTA_LOGADO, 10L))
+                .thenReturn(List.of());
+
+        assertThatThrownBy(() -> intencaoCompraService.concluirIntencaoCompra(criarInputConclusao(10L, "Desisti")))
+                .isInstanceOf(IntencaoCompraNaoEncontradaException.class);
+
+        verify(intencaoCompraRepository, never()).saveAll(any());
+    }
+
 }
