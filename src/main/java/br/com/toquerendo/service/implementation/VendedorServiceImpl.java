@@ -13,12 +13,19 @@ import br.com.toquerendo.utils.SecurityUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class VendedorServiceImpl implements VendedorService {
+
+    private static final Pattern NUMERO_INTEIRO = Pattern.compile("\\d{1,18}");
 
     private VendedorRepository vendedorRepository;
 
@@ -66,17 +73,21 @@ public class VendedorServiceImpl implements VendedorService {
         return output;
     }
 
-    public List<VendedorLocalizacaoProdutosOutputDto> consultarLocalizacaoVendedores(Long idProdutoBase, Long idPraia) {
+    public List<VendedorLocalizacaoProdutosOutputDto> consultarLocalizacaoVendedores(String idsProdutosBase, Long idPraia) {
 
         praiaRepository.findById(idPraia)
                 .orElseThrow(PraiaNaoEncontradaException::new);
 
+        Set<Long> idsProdutoBase = extrairIdsProdutosBase(idsProdutosBase);
+        boolean filtrarPorProdutoBase = !idsProdutoBase.isEmpty();
+
         List<Vendedor> vendedores;
 
-        if(idProdutoBase != null){
-            produtoBaseRepository.findByIdAndEstaAtivoTrue(idProdutoBase)
-                    .orElseThrow(ProdutoNaoEncontradoException::new);
-            vendedores = vendedorRepository.findAllVendedoresOnlinePorProdutoBaseEPraia(idProdutoBase, idPraia);
+        if (filtrarPorProdutoBase) {
+            if (produtoBaseRepository.findAllByIdInAndEstaAtivoTrue(idsProdutoBase).size() != idsProdutoBase.size()) {
+                throw new ProdutoNaoEncontradoException();
+            }
+            vendedores = vendedorRepository.findAllVendedoresOnlinePorProdutosBaseEPraia(idsProdutoBase, idPraia);
         }
         else{
             vendedores = vendedorRepository.findAllVendedoresOnlinePorPraiaComAlgumProduto(idPraia);
@@ -85,12 +96,23 @@ public class VendedorServiceImpl implements VendedorService {
                 .map(vendedor -> {
                     Usuario usuario = vendedor.getUsuario();
                     Localizacao localizacao = localizacaoRepository.findById(usuario.getId()).orElse(null);
-                    List<ProdutoEspecifico> produtosVendedor = idProdutoBase != null
-                            ? produtoEspecificoRepository.findAllByVendedorIdAndProdutoBaseIdAndProdutoAtivoTrueAndProdutoBaseAtivo(vendedor.getId(), idProdutoBase)
+                    List<ProdutoEspecifico> produtosVendedor = filtrarPorProdutoBase
+                            ? produtoEspecificoRepository.findAllByVendedorIdAndProdutoBaseIdInAndProdutoAtivoTrueAndProdutoBaseAtivo(vendedor.getId(), idsProdutoBase)
                             : produtoEspecificoRepository.findAllByVendedorIdAndProdutoAtivoTrueAndProdutoBaseAtivo(vendedor.getId());
                     return VendedorLocalizacaoProdutosOutputDto.fromEntities(vendedor, localizacao, produtosVendedor);
                 })
                 .toList();
+    }
+
+    private Set<Long> extrairIdsProdutosBase(String idsProdutosBase) {
+        if (idsProdutosBase == null || idsProdutosBase.isBlank()) {
+            return Set.of();
+        }
+        return Arrays.stream(idsProdutosBase.split(","))
+                .map(String::trim)
+                .filter(token -> NUMERO_INTEIRO.matcher(token).matches())
+                .map(Long::valueOf)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private void verificarSeUsuarioPodeSerVendedor(Usuario usuario) {

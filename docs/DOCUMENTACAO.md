@@ -357,11 +357,11 @@ Regras transversais: operações "do usuário logado" usam `findByEmailAndContaA
 - Se **não** for admin, muda a categoria para VENDEDOR. Admin permanece admin.
 - Retorna `UsuarioOutputDto` com `descricao`, `online` e um **token novo** (com as roles atualizadas).
 
-**Consultar vendedores no mapa** (`GET /vendedor/localizacao?idPraia=…&idProdutoBase=…`, `@TuristaOnly`):
+**Consultar vendedores no mapa** (`GET /vendedor/localizacao?idPraia=…&idsProdutosBase=3,2,6`, `@TuristaOnly`):
 - `idPraia` obrigatório e deve existir (404 `PraiaNaoEncontradaException`).
-- `idProdutoBase` **opcional**. Se informado, deve ser produto base **ativo** (404 senão) e a busca traz vendedores **online** da praia com **produto específico ativo** daquele base. Se omitido, traz vendedores online da praia com **algum** produto ativo cujo produto base esteja ativo.
+- `idsProdutosBase` **opcional**, texto com ids separados por vírgula (ex.: `"3,2,6,3"`). O serviço extrai só os tokens **numéricos** (com `trim`), descarta repetidos e ignora o resto (`abc`, vazios, negativos, decimais). Se sobrar ao menos um id: **todos** devem ser produtos base **ativos** (se algum não existir/estiver inativo → 404 `ProdutoNaoEncontradoException`) e a busca traz vendedores **online** da praia com produto específico **ativo de qualquer um** desses bases (OU, sem duplicar vendedor). Se omitido, vazio ou sem nenhum id numérico: não filtra por base e traz vendedores online da praia com **algum** produto ativo cujo produto base esteja ativo.
 - Para cada vendedor retorna `{idVendedor, nomeVendedor, latitude, longitude, produtos[]}`. **Vendedor sem localização registrada aparece com latitude/longitude `0`** (não é omitido).
-- `produtos` = produtos específicos ativos (do base informado, ou todos ativos com base ativo).
+- `produtos` = produtos específicos ativos do vendedor, restritos aos produtos base informados (ou todos os ativos com base ativo, se não houve filtro).
 
 ### 7.3 Produto Base (catálogo) (`ProdutoBaseServiceImpl`)
 
@@ -428,7 +428,7 @@ Legenda de acesso: **Público** · **Auth** (qualquer autenticado) · **Turista*
 | PUT | `/usuario` | Auth | body `AtualizarUsuarioRequestDto` | `UsuarioOutputDto` | 400 |
 | GET | `/usuario/meus-dados` | Auth | — | `UsuarioOutputDto` | — |
 | POST | `/vendedor` | Auth | body `CriarVendedorRequestDto` | `UsuarioOutputDto` (+`token`) | 400 (`CriacaoVendedorException`), 409 já vendedor |
-| GET | `/vendedor/localizacao` | Turista | query `idPraia` (obrig.), `idProdutoBase` (opc.) | `List<VendedorLocalizacaoProdutosOutputDto>` | 400 param ausente, 404 praia/produto |
+| GET | `/vendedor/localizacao` | Turista | query `idPraia` (obrig.), `idsProdutosBase` (opc., ex.: `3,2,6`) | `List<VendedorLocalizacaoProdutosOutputDto>` | 400 param ausente, 404 praia/produto |
 | GET | `/praia` | Auth | — | `List<PraiaOutputDto>` | — |
 | GET | `/praia/{id}` | Auth | path | `PraiaOutputDto` (+`qtdVendedoresOnline`) | 404 |
 | POST | `/praia` | Admin | body `CriarPraiaInputDto` | `PraiaOutputDto` | 400, 403 |
@@ -659,7 +659,7 @@ Itens abaixo são fatos verificados no código; **não** são necessariamente bu
 2. `GET /praia`, `GET /produto-base?idPraia=` para descobrir o que existe na praia.
 3. `PUT /localizacao` periodicamente (envia onde está).
 4. `POST /intencao-compra` `{idProdutoBase, descricaoLocal, observacoes?, urlFotoLocal?}`.
-5. `GET /vendedor/localizacao?idPraia=&idProdutoBase=` (polling) para ver vendedores online e seus produtos.
+5. `GET /vendedor/localizacao?idPraia=&idsProdutosBase=3,2` (polling) para ver vendedores online e seus produtos.
 6. `GET /intencao-compra/minhas-intencoes` para acompanhar.
 7. `DELETE /intencao-compra` `{idProdutoBase, motivo}` ao desistir/comprar → intenção concluída.
 

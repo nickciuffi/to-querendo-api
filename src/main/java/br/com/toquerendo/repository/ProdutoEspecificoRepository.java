@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ProdutoEspecificoRepository extends JpaRepository<ProdutoEspecifico, Long> {
@@ -21,12 +22,12 @@ public interface ProdutoEspecificoRepository extends JpaRepository<ProdutoEspeci
 
     @Query("select pe from ProdutoEspecifico pe " +
             "where pe.vendedor.id = :vendedorId " +
-            "and pe.produtoBase.id = :idProdutoBase " +
+            "and pe.produtoBase.id in :idsProdutosBase " +
             "and pe.produtoAtivo = true " +
             "and pe.produtoBase.estaAtivo = true")
-    List<ProdutoEspecifico> findAllByVendedorIdAndProdutoBaseIdAndProdutoAtivoTrueAndProdutoBaseAtivo(
+    List<ProdutoEspecifico> findAllByVendedorIdAndProdutoBaseIdInAndProdutoAtivoTrueAndProdutoBaseAtivo(
             @Param("vendedorId") Long vendedorId,
-            @Param("idProdutoBase") Long idProdutoBase);
+            @Param("idsProdutosBase") Collection<Long> idsProdutosBase);
 
     List<ProdutoEspecifico> findAllByVendedorId(@Param("vendedorId") Long vendedorId);
 }

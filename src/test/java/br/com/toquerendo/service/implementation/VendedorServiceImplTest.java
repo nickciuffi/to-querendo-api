@@ -25,6 +25,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,12 +34,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -270,18 +274,30 @@ class VendedorServiceImplTest {
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getLatitude()).isEqualByComparingTo("0");
         assertThat(resultado.get(0).getLongitude()).isEqualByComparingTo("0");
-        verify(produtoBaseRepository, never()).findByIdAndEstaAtivoTrue(any());
+        verify(produtoBaseRepository, never()).findAllByIdInAndEstaAtivoTrue(any());
+        verify(vendedorRepository, never()).findAllVendedoresOnlinePorProdutosBaseEPraia(any(), any());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", "   ", "abc", ",,", "a,b, ,x1", "-3", "1.5"})
+    void consultarLocalizacaoVendedores_semNenhumIdNumerico_naoDeveFiltrarPorProdutoBase(String idsProdutosBase) {
+        when(praiaRepository.findById(1L)).thenReturn(Optional.of(new Praia()));
+        when(vendedorRepository.findAllVendedoresOnlinePorPraiaComAlgumProduto(1L)).thenReturn(List.of());
+
+        List<VendedorLocalizacaoProdutosOutputDto> resultado =
+                vendedorService.consultarLocalizacaoVendedores(idsProdutosBase, 1L);
+
+        assertThat(resultado).isEmpty();
+        verify(vendedorRepository).findAllVendedoresOnlinePorPraiaComAlgumProduto(1L);
+        verify(produtoBaseRepository, never()).findAllByIdInAndEstaAtivoTrue(any());
+        verify(vendedorRepository, never()).findAllVendedoresOnlinePorProdutosBaseEPraia(any(), any());
     }
 
     @Test
-    void consultarLocalizacaoVendedores_comIdProdutoBaseValido_deveConsultarPorProdutoBaseEPraia() {
-        Praia praia = new Praia();
-        praia.setId(1L);
-        when(praiaRepository.findById(1L)).thenReturn(Optional.of(praia));
-
-        ProdutoBase produtoBase = new ProdutoBase();
-        produtoBase.setId(10L);
-        when(produtoBaseRepository.findByIdAndEstaAtivoTrue(10L)).thenReturn(Optional.of(produtoBase));
+    void consultarLocalizacaoVendedores_comVariosIds_deveConsultarPorQualquerUmDosProdutosBaseEPraia() {
+        when(praiaRepository.findById(1L)).thenReturn(Optional.of(new Praia()));
+        when(produtoBaseRepository.findAllByIdInAndEstaAtivoTrue(any()))
+                .thenReturn(List.of(criarProdutoBase(3L), criarProdutoBase(2L), criarProdutoBase(6L)));
 
         Usuario usuario = criarUsuarioTuristaApto();
         Vendedor vendedor = criarVendedor(1L, usuario);
@@ -289,26 +305,66 @@ class VendedorServiceImplTest {
         localizacao.setLatitude(new java.math.BigDecimal("-23.5614750"));
         localizacao.setLongitude(new java.math.BigDecimal("-46.6558830"));
 
-        when(vendedorRepository.findAllVendedoresOnlinePorProdutoBaseEPraia(10L, 1L)).thenReturn(List.of(vendedor));
+        when(vendedorRepository.findAllVendedoresOnlinePorProdutosBaseEPraia(any(), eq(1L))).thenReturn(List.of(vendedor));
         when(localizacaoRepository.findById(1L)).thenReturn(Optional.of(localizacao));
+        when(produtoEspecificoRepository.findAllByVendedorIdAndProdutoBaseIdInAndProdutoAtivoTrueAndProdutoBaseAtivo(eq(1L), any()))
+                .thenReturn(List.of());
 
-        List<VendedorLocalizacaoProdutosOutputDto> resultado = vendedorService.consultarLocalizacaoVendedores(10L, 1L);
+        List<VendedorLocalizacaoProdutosOutputDto> resultado =
+                vendedorService.consultarLocalizacaoVendedores("3,2,6,3", 1L);
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getLatitude()).isEqualByComparingTo("-23.5614750");
+
+        ArgumentCaptor<Collection<Long>> idsCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(vendedorRepository).findAllVendedoresOnlinePorProdutosBaseEPraia(idsCaptor.capture(), eq(1L));
+        assertThat(idsCaptor.getValue()).containsExactly(3L, 2L, 6L);
         verify(vendedorRepository, never()).findAllVendedoresOnlinePorPraiaComAlgumProduto(any());
     }
 
     @Test
-    void consultarLocalizacaoVendedores_comIdProdutoBaseInexistenteOuInativo_deveLancarProdutoNaoEncontradoException() {
-        Praia praia = new Praia();
-        praia.setId(1L);
-        when(praiaRepository.findById(1L)).thenReturn(Optional.of(praia));
-        when(produtoBaseRepository.findByIdAndEstaAtivoTrue(10L)).thenReturn(Optional.empty());
+    void consultarLocalizacaoVendedores_comIdsComEspacosEValoresNaoNumericos_deveUsarSomenteOsNumericosSemRepeticao() {
+        when(praiaRepository.findById(1L)).thenReturn(Optional.of(new Praia()));
+        when(produtoBaseRepository.findAllByIdInAndEstaAtivoTrue(any()))
+                .thenReturn(List.of(criarProdutoBase(3L), criarProdutoBase(7L)));
+        when(vendedorRepository.findAllVendedoresOnlinePorProdutosBaseEPraia(any(), eq(1L))).thenReturn(List.of());
 
-        assertThatThrownBy(() -> vendedorService.consultarLocalizacaoVendedores(10L, 1L))
+        vendedorService.consultarLocalizacaoVendedores(" 3 , abc,,7,3 ", 1L);
+
+        ArgumentCaptor<Collection<Long>> idsCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(vendedorRepository).findAllVendedoresOnlinePorProdutosBaseEPraia(idsCaptor.capture(), eq(1L));
+        assertThat(idsCaptor.getValue()).containsExactly(3L, 7L);
+    }
+
+    @Test
+    void consultarLocalizacaoVendedores_comIdUnico_deveFuncionarComoAntes() {
+        when(praiaRepository.findById(1L)).thenReturn(Optional.of(new Praia()));
+        when(produtoBaseRepository.findAllByIdInAndEstaAtivoTrue(any())).thenReturn(List.of(criarProdutoBase(10L)));
+        when(vendedorRepository.findAllVendedoresOnlinePorProdutosBaseEPraia(any(), eq(1L))).thenReturn(List.of());
+
+        vendedorService.consultarLocalizacaoVendedores("10", 1L);
+
+        ArgumentCaptor<Collection<Long>> idsCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(vendedorRepository).findAllVendedoresOnlinePorProdutosBaseEPraia(idsCaptor.capture(), eq(1L));
+        assertThat(idsCaptor.getValue()).containsExactly(10L);
+    }
+
+    @Test
+    void consultarLocalizacaoVendedores_quandoAlgumProdutoBaseInexistenteOuInativo_deveLancarProdutoNaoEncontradoException() {
+        when(praiaRepository.findById(1L)).thenReturn(Optional.of(new Praia()));
+        when(produtoBaseRepository.findAllByIdInAndEstaAtivoTrue(any()))
+                .thenReturn(List.of(criarProdutoBase(3L)));
+
+        assertThatThrownBy(() -> vendedorService.consultarLocalizacaoVendedores("3,2", 1L))
                 .isInstanceOf(ProdutoNaoEncontradoException.class);
 
-        verify(vendedorRepository, never()).findAllVendedoresOnlinePorProdutoBaseEPraia(any(), any());
+        verify(vendedorRepository, never()).findAllVendedoresOnlinePorProdutosBaseEPraia(any(), any());
+    }
+
+    private ProdutoBase criarProdutoBase(Long id) {
+        ProdutoBase produtoBase = new ProdutoBase();
+        produtoBase.setId(id);
+        produtoBase.setEstaAtivo(true);
+        return produtoBase;
     }
 }
