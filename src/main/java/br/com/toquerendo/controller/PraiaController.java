@@ -5,6 +5,7 @@ import br.com.toquerendo.dto.input.AtualizarPraiaInputDto;
 import br.com.toquerendo.dto.input.CriarPraiaInputDto;
 import br.com.toquerendo.dto.output.PraiaOutputDto;
 import br.com.toquerendo.security.annotation.AdminOnly;
+import br.com.toquerendo.security.annotation.TuristaOnly;
 import br.com.toquerendo.service.PraiaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,6 +41,7 @@ public class PraiaController {
             summary = "Listar praias",
             description = "Retorna todas as praias cadastradas. Requer usuário autenticado, disponível para todas as roles."
     )
+    @AdminOnly
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
@@ -52,9 +54,40 @@ public class PraiaController {
                             schema = @Schema(implementation = ApiResponse.class))
             )
     })
-    public ResponseEntity<ApiResponse<List<PraiaOutputDto>>> consultarPraias() {
-        List<PraiaOutputDto> praias = praiaService.consultarPraias();
+    public ResponseEntity<ApiResponse<List<PraiaOutputDto>>> consultarTodasPraias() {
+        List<PraiaOutputDto> praias = praiaService.consultarTodasPraias();
         return ResponseEntity.ok().body(new ApiResponse<>(praias, "Praias consultadas com sucesso!"));
+    }
+
+    @GetMapping("/proximas")
+    @Operation(
+            summary = "Listar praias próximas ao usuário",
+            description = "Retorna as praias a no máximo 20 km da localização salva do usuário autenticado "
+                    + "(definida via PUT /localizacao), ordenadas da mais próxima para a mais distante, com a distância "
+                    + "em km em cada praia. Praias sem coordenadas são ignoradas. Se o usuário ainda não tiver localização "
+                    + "salva, retorna lista vazia. Disponível para turistas e vendedores."
+    )
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "Praias próximas consultadas com sucesso"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "401",
+                    description = "Token ausente, inválido ou expirado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "403",
+                    description = "Usuário autenticado não possui a role de turista ou vendedor",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiResponse.class))
+            )
+    })
+    public ResponseEntity<ApiResponse<List<PraiaOutputDto>>> consultarPraiasProximas() {
+        List<PraiaOutputDto> praias = praiaService.consultarPraiasProximas();
+        return ResponseEntity.ok().body(new ApiResponse<>(praias, "Praias próximas consultadas com sucesso!"));
     }
 
     @GetMapping("/{id}")
@@ -159,7 +192,7 @@ public class PraiaController {
     })
     public ResponseEntity<ApiResponse<PraiaOutputDto>> atualizarPraia(
             @Parameter(description = "Identificador da praia", required = true) @PathVariable Long id,
-            @RequestBody AtualizarPraiaInputDto praia) {
+            @RequestBody @Valid AtualizarPraiaInputDto praia) {
         PraiaOutputDto output = praiaService.atualizarPraia(id, praia);
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Praia atualizada com sucesso!"));
     }

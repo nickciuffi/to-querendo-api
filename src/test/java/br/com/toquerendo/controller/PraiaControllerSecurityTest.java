@@ -17,6 +17,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -53,15 +55,58 @@ class PraiaControllerSecurityTest {
         input.setNome("Praia Nova");
         input.setCidade("Recife");
         input.setEstado("PE");
+        input.setLatitude(new BigDecimal("-8.1189"));
+        input.setLongitude(new BigDecimal("-34.8998"));
+        return input;
+    }
+
+    private AtualizarPraiaInputDto criarInputAtualizacaoValido() {
+        AtualizarPraiaInputDto input = new AtualizarPraiaInputDto();
+        input.setLatitude(new BigDecimal("-8.1189"));
+        input.setLongitude(new BigDecimal("-34.8998"));
         return input;
     }
 
     @Test
-    @WithMockUser(roles = "TURISTA")
-    void consultarPraias_comQualquerRoleAutenticada_deveSerPermitido() throws Exception {
-        when(praiaService.consultarPraias()).thenReturn(emptyList());
+    @WithMockUser(roles = "ADMIN")
+    void consultarTodasPraias_comRoleAdmin_deveSerPermitido() throws Exception {
+        when(praiaService.consultarTodasPraias()).thenReturn(emptyList());
 
         mockMvc.perform(get("/praia"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "TURISTA")
+    void consultarTodasPraias_comRoleTurista_deveSerNegado() throws Exception {
+        mockMvc.perform(get("/praia"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "TURISTA")
+    void consultarPraiasProximas_comRoleTurista_deveSerPermitido() throws Exception {
+        when(praiaService.consultarPraiasProximas()).thenReturn(emptyList());
+
+        mockMvc.perform(get("/praia/proximas"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = {"TURISTA", "VENDEDOR"})
+    void consultarPraiasProximas_comRoleVendedor_deveSerPermitido() throws Exception {
+        when(praiaService.consultarPraiasProximas()).thenReturn(emptyList());
+
+        mockMvc.perform(get("/praia/proximas"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void consultarPraiasProximas_comRoleAdmin_deveSerPermitido() throws Exception {
+        when(praiaService.consultarPraiasProximas()).thenReturn(emptyList());
+
+        mockMvc.perform(get("/praia/proximas"))
                 .andExpect(status().isOk());
     }
 
@@ -110,7 +155,7 @@ class PraiaControllerSecurityTest {
 
         mockMvc.perform(put("/praia/{id}", 1L)
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(new AtualizarPraiaInputDto())))
+                        .content(objectMapper.writeValueAsString(criarInputAtualizacaoValido())))
                 .andExpect(status().isOk());
     }
 
@@ -119,7 +164,7 @@ class PraiaControllerSecurityTest {
     void atualizarPraia_comRoleTurista_deveSerNegado() throws Exception {
         mockMvc.perform(put("/praia/{id}", 1L)
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(new AtualizarPraiaInputDto())))
+                        .content(objectMapper.writeValueAsString(criarInputAtualizacaoValido())))
                 .andExpect(status().isForbidden());
     }
 

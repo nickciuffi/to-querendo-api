@@ -2,9 +2,11 @@ package br.com.toquerendo.service.implementation;
 
 import br.com.toquerendo.dto.output.UsuarioOutputDto;
 import br.com.toquerendo.entity.Categoria;
+import br.com.toquerendo.entity.Localizacao;
 import br.com.toquerendo.entity.Praia;
 import br.com.toquerendo.entity.Usuario;
 import br.com.toquerendo.exception.UsuarioNaoAutorizadoException;
+import br.com.toquerendo.repository.LocalizacaoRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
 import br.com.toquerendo.repository.VendedorRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +40,9 @@ class UsuarioServiceImplTest {
 
     @Mock
     private VendedorRepository vendedorRepository;
+
+    @Mock
+    private LocalizacaoRepository localizacaoRepository;
 
     @InjectMocks
     private UsuarioServiceImpl usuarioService;
@@ -93,6 +99,40 @@ class UsuarioServiceImplTest {
 
         assertThat(output.getCategoria()).isNull();
         assertThat(output.getPraiaAtual()).isNull();
+    }
+
+    @Test
+    void consultarUsuarioAutenticado_quandoHaLocalizacaoSalva_deveRetornarLatitudeELongitude() {
+        autenticarUsuario(EMAIL_USUARIO_LOGADO);
+
+        Usuario usuario = criarUsuario();
+        usuario.setId(7L);
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+
+        Localizacao localizacao = new Localizacao();
+        localizacao.setLatitude(new BigDecimal("-23.5614750"));
+        localizacao.setLongitude(new BigDecimal("-46.6558830"));
+        when(localizacaoRepository.findById(7L)).thenReturn(Optional.of(localizacao));
+
+        UsuarioOutputDto output = usuarioService.consultarUsuarioAutenticado();
+
+        assertThat(output.getLatitude()).isEqualByComparingTo("-23.5614750");
+        assertThat(output.getLongitude()).isEqualByComparingTo("-46.6558830");
+    }
+
+    @Test
+    void consultarUsuarioAutenticado_quandoNaoHaLocalizacaoSalva_deveRetornarLatitudeELongitudeNulas() {
+        autenticarUsuario(EMAIL_USUARIO_LOGADO);
+
+        Usuario usuario = criarUsuario();
+        usuario.setId(7L);
+        when(usuarioRepository.findByEmailAndContaAtivaTrue(EMAIL_USUARIO_LOGADO)).thenReturn(Optional.of(usuario));
+        when(localizacaoRepository.findById(7L)).thenReturn(Optional.empty());
+
+        UsuarioOutputDto output = usuarioService.consultarUsuarioAutenticado();
+
+        assertThat(output.getLatitude()).isNull();
+        assertThat(output.getLongitude()).isNull();
     }
 
     @Test
