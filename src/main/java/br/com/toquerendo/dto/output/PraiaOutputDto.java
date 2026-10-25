@@ -37,6 +37,9 @@ public class PraiaOutputDto {
     @Schema(description = "Quantidade de vendedores online na praia", example = "5")
     private Integer qtdVendedoresOnline;
 
+    @Schema(description = "Distância da praia até o usuário, em km (arredondada para 1 casa). Preenchida apenas na consulta de praias próximas.", example = "3.4")
+    private Double distanciaKm;
+
     public static PraiaOutputDto fromEntity(Praia praia) {
         if(praia == null) {
             return null;

@@ -10,7 +10,9 @@ public interface PraiaService {
 
     PraiaOutputDto criarPraia(CriarPraiaInputDto input);
 
-    List<PraiaOutputDto> consultarPraias();
+    List<PraiaOutputDto> consultarTodasPraias();
+
+    List<PraiaOutputDto> consultarPraiasProximas();
 
     PraiaOutputDto consultarPraiaPorId(Long id);
 

@@ -61,7 +61,7 @@ class PraiaControllerTest {
 
     @Test
     void consultarPraias_deveRetornar200ComListaDePraias() throws Exception {
-        when(praiaService.consultarPraias()).thenReturn(List.of(criarPraiaOutput()));
+        when(praiaService.consultarTodasPraias()).thenReturn(List.of(criarPraiaOutput()));
 
         mockMvc.perform(get("/praia"))
                 .andExpect(status().isOk())
@@ -69,6 +69,28 @@ class PraiaControllerTest {
                 .andExpect(jsonPath("$.response[0].latitude").value(-8.1189))
                 .andExpect(jsonPath("$.response[0].longitude").value(-34.8998))
                 .andExpect(jsonPath("$.messages[0]").value("Praias consultadas com sucesso!"));
+    }
+
+    @Test
+    void consultarPraiasProximas_deveRetornar200ComPraiasEDistancia() throws Exception {
+        PraiaOutputDto praia = criarPraiaOutput();
+        praia.setDistanciaKm(3.4);
+        when(praiaService.consultarPraiasProximas()).thenReturn(List.of(praia));
+
+        mockMvc.perform(get("/praia/proximas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.response[0].nome").value("Praia de Boa Viagem"))
+                .andExpect(jsonPath("$.response[0].distanciaKm").value(3.4))
+                .andExpect(jsonPath("$.messages[0]").value("Praias próximas consultadas com sucesso!"));
+    }
+
+    @Test
+    void consultarPraiasProximas_semPraiasProximas_deveRetornar200ComListaVazia() throws Exception {
+        when(praiaService.consultarPraiasProximas()).thenReturn(List.of());
+
+        mockMvc.perform(get("/praia/proximas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.response").isEmpty());
     }
 
     @Test
@@ -98,6 +120,8 @@ class PraiaControllerTest {
         input.setNome("Praia de Boa Viagem");
         input.setCidade("Recife");
         input.setEstado("PE");
+        input.setLatitude(new BigDecimal("-8.1189"));
+        input.setLongitude(new BigDecimal("-34.8998"));
 
         when(praiaService.criarPraia(any())).thenReturn(criarPraiaOutput());
 
@@ -139,6 +163,8 @@ class PraiaControllerTest {
     void atualizarPraia_quandoExiste_deveRetornar200() throws Exception {
         AtualizarPraiaInputDto input = new AtualizarPraiaInputDto();
         input.setNome("Novo nome");
+        input.setLatitude(new BigDecimal("-8.1189"));
+        input.setLongitude(new BigDecimal("-34.8998"));
 
         when(praiaService.atualizarPraia(anyLong(), any())).thenReturn(criarPraiaOutput());
 
@@ -165,6 +191,31 @@ class PraiaControllerTest {
                         .content(objectMapper.writeValueAsString(input)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.response.latitude").value(-8.1189));
+    }
+
+    @Test
+    void criarPraia_semCoordenadas_deveRetornar400() throws Exception {
+        CriarPraiaInputDto input = new CriarPraiaInputDto();
+        input.setNome("Praia de Boa Viagem");
+        input.setCidade("Recife");
+        input.setEstado("PE");
+
+        mockMvc.perform(post("/praia")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(input)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.messages[1]").exists());
+    }
+
+    @Test
+    void atualizarPraia_semCoordenadas_deveRetornar400() throws Exception {
+        AtualizarPraiaInputDto input = new AtualizarPraiaInputDto();
+        input.setNome("Novo nome");
+
+        mockMvc.perform(put("/praia/{id}", 1L)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(input)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -232,6 +283,8 @@ class PraiaControllerTest {
     void atualizarPraia_quandoNaoExiste_deveRetornar404() throws Exception {
         AtualizarPraiaInputDto input = new AtualizarPraiaInputDto();
         input.setNome("Novo nome");
+        input.setLatitude(new BigDecimal("-8.1189"));
+        input.setLongitude(new BigDecimal("-34.8998"));
 
         when(praiaService.atualizarPraia(anyLong(), any())).thenThrow(new PraiaNaoEncontradaException());
 

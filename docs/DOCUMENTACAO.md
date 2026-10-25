@@ -123,7 +123,7 @@ to-querendo-api/
 | `enums/` | `CategoriaUsuarioEnum` (categorias → roles). |
 | `exception/` | Exceções de negócio e `GlobalExceptionHandler` (`@RestControllerAdvice`). |
 | `security/` | `JwtService`, `JwtAuthenticationFilter`, `SecurityConstants` (rotas públicas), `security/annotation/{AdminOnly,VendedorOnly,TuristaOnly}`. |
-| `utils/` | `SecurityUtils` (usuário logado / checagem de role), `DocumentoUtils` (validação de CPF). |
+| `utils/` | `SecurityUtils` (usuário logado / checagem de role), `DocumentoUtils` (validação de CPF), `GeoUtils` (distância haversine em km). |
 | `db/migration/` | Scripts SQL do Flyway (dentro de `src/main/java`!). |
 
 ### 3.3 Arquitetura em camadas
@@ -345,7 +345,7 @@ Violação → `AuthorizationDeniedException` → **403** "Endpoint somente disp
 - `nome`, `telefone`, `urlFoto` opcionais.
 - Se o usuário **é vendedor** (registro em `vendedores` **e** role `ROLE_VENDEDOR`): também atualiza `online` e `descricao` do vendedor e os devolve na resposta. **É assim que o vendedor fica online/offline.**
 
-**Consulta** (`GET /usuario/meus-dados`): dados do usuário logado; se for vendedor, inclui `online` e `descricao`.
+**Consulta** (`GET /usuario/meus-dados`): dados do usuário logado; se for vendedor, inclui `online` e `descricao`; se houver localização salva (`PUT /localizacao`), inclui também `latitude` e `longitude` (omitidos do JSON quando não há localização). Só esta consulta preenche as coordenadas — cadastro, edição e upgrade para vendedor não.
 
 Regras transversais: operações "do usuário logado" usam `findByEmailAndContaAtivaTrue` (conta inativa = "Usuário não encontrado").
 
@@ -384,7 +384,8 @@ Tudo restrito a vendedor e **sempre sobre os produtos do vendedor logado**.
 
 ### 7.5 Praia (`PraiaServiceImpl`)
 
-- Leitura (lista e por id): qualquer autenticado. Escrita (criar/atualizar/remover): **admin**.
+- Leitura por id (`GET /praia/{id}`) e praias próximas (`GET /praia/proximas`): qualquer autenticado. **Listar todas** (`GET /praia`) e escrita (criar/atualizar/remover): **admin**.
+- **Praias próximas** (`GET /praia/proximas`, qualquer autenticado): usa a **localização salva** do usuário logado (`PUT /localizacao`; `LocalizacaoRepository.findByUsuarioEmail`). Sem localização salva → `200` com `[]`. Considera só praias com latitude **e** longitude preenchidas, calcula a distância em linha reta (haversine, `GeoUtils`), mantém as a **≤ 20 km** (raio fixo, constante em `PraiaServiceImpl`) e ordena da mais próxima para a mais distante. Cada praia traz `distanciaKm` (arredondada a 1 casa; o filtro usa o valor sem arredondar). O cálculo é feito em memória, sobre todas as praias com coordenadas — adequado a um catálogo pequeno.
 - `GET /praia/{id}` inclui `qtdVendedoresOnline` (vendedores `online=true` cujo usuário está na praia); a lista **não** inclui essa contagem.
 - Criar: `nome`, `cidade`, `estado` (2 letras) obrigatórios; `latitude`/`longitude` **opcionais** (−90…90 e −180…180 quando informadas). Atualizar: parcial (campo nulo preserva; não é possível "limpar" as coordenadas pela API).
 - As coordenadas saem em toda `PraiaOutputDto` (lista, por id, criação, edição) — inclusive em `praiaAtual` dentro de `UsuarioOutputDto` — e são omitidas do JSON quando nulas.
@@ -431,7 +432,8 @@ Legenda de acesso: **Público** · **Auth** (qualquer autenticado) · **Turista*
 | GET | `/usuario/meus-dados` | Auth | — | `UsuarioOutputDto` | — |
 | POST | `/vendedor` | Auth | body `CriarVendedorRequestDto` | `UsuarioOutputDto` (+`token`) | 400 (`CriacaoVendedorException`), 409 já vendedor |
 | GET | `/vendedor/localizacao` | Turista | query `idPraia` (obrig.), `idsProdutosBase` (opc., ex.: `3,2,6`) | `List<VendedorLocalizacaoProdutosOutputDto>` | 400 param ausente, 404 praia/produto |
-| GET | `/praia` | Auth | — | `List<PraiaOutputDto>` | — |
+| GET | `/praia` | Admin | — | `List<PraiaOutputDto>` | 403 |
+| GET | `/praia/proximas` | Auth | — (usa a localização salva) | `List<PraiaOutputDto>` (+`distanciaKm`), ≤ 20 km, mais próximas primeiro | — |
 | GET | `/praia/{id}` | Auth | path | `PraiaOutputDto` (+`qtdVendedoresOnline`) | 404 |
 | POST | `/praia` | Admin | body `CriarPraiaInputDto` | `PraiaOutputDto` | 400, 403 |
 | PUT | `/praia/{id}` | Admin | body `AtualizarPraiaInputDto` | `PraiaOutputDto` | 400, 403, 404 |
@@ -525,8 +527,8 @@ Padrão de **atualização**: DTOs "Atualizar*" não têm `@NotNull`; o serviço
 | DTO | Campos |
 |---|---|
 | `LoginResponseDto` | `token`, `tipo`, `expiraEmMs` |
-| `UsuarioOutputDto` | `email`, `nome`, `cpf`, `telefone`, `urlFoto` (nulos viram `""`), `praiaAtual` (`PraiaOutputDto`, sempre presente), `categoria` (`CategoriaOutputDto`, sempre presente), e — só quando aplicável — `token`, `descricao`, `online` |
-| `PraiaOutputDto` | `id`, `nome`, `urlFoto`, `cidade`, `estado`, `latitude`, `longitude` (nulos omitidos), `qtdVendedoresOnline` (só em `GET /praia/{id}`) |
+| `UsuarioOutputDto` | `email`, `nome`, `cpf`, `telefone`, `urlFoto` (nulos viram `""`), `praiaAtual` (`PraiaOutputDto`, sempre presente), `categoria` (`CategoriaOutputDto`, sempre presente), e — só quando aplicável — `token`, `descricao`, `online`, `latitude`/`longitude` (só em `GET /usuario/meus-dados`, se houver localização salva) |
+| `PraiaOutputDto` | `id`, `nome`, `urlFoto`, `cidade`, `estado`, `latitude`, `longitude` (nulos omitidos), `qtdVendedoresOnline` (só em `GET /praia/{id}`), `distanciaKm` (só em `GET /praia/proximas`) |
 | `CategoriaOutputDto` | `id`, `descricao` |
 | `ProdutoBaseOutputDto` | `id`, `nome`, `descricao`, `urlFoto`, `precoMinimo` (String), `estaAtivo` |
 | `ProdutoEspecificoOutputDto` | `id`, `nome`, `descricao`, `urlFoto`, `idProdutoBase`, `nomeProdutoBase`, `idVendedor`, `preco`, `produtoAtivo`, `produtoBaseAtivo`, `tsCriacaoProduto` (String `dd/MM/yyyy HH:mm`) |

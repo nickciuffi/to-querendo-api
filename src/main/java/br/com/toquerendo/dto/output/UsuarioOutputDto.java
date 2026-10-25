@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -44,6 +45,12 @@ public class UsuarioOutputDto {
 
     @Schema(description = "Indica se o vendedor está online e disponível para venda", example = "false")
     private Boolean online;
+
+    @Schema(description = "Latitude da última localização enviada pelo usuário. Presente apenas na consulta dos dados do usuário logado e quando há localização salva.", example = "-23.5614750")
+    private BigDecimal latitude;
+
+    @Schema(description = "Longitude da última localização enviada pelo usuário. Presente apenas na consulta dos dados do usuário logado e quando há localização salva.", example = "-46.6558830")
+    private BigDecimal longitude;
 
     public static UsuarioOutputDto fromEntity(Usuario usuario) {
         return UsuarioOutputDto.builder()

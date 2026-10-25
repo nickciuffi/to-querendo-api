@@ -11,6 +11,7 @@ import br.com.toquerendo.exception.CpfJaCadastradoException;
 import br.com.toquerendo.exception.EmailJaCadastradoException;
 import br.com.toquerendo.exception.RuntimeApiException;
 import br.com.toquerendo.exception.UsuarioNaoAutorizadoException;
+import br.com.toquerendo.repository.LocalizacaoRepository;
 import br.com.toquerendo.repository.PraiaRepository;
 import br.com.toquerendo.repository.UsuarioRepository;
 import br.com.toquerendo.repository.VendedorRepository;
@@ -37,6 +38,8 @@ public class UsuarioServiceImpl implements UsuarioService {
     private PasswordEncoder passwordEncoder;
 
     private VendedorRepository vendedorRepository;
+
+    private LocalizacaoRepository localizacaoRepository;
 
     public UsuarioOutputDto cadastrarUsuario(CadastroUsuarioRequestDto cadastroRequest) {
 
@@ -114,6 +117,11 @@ public class UsuarioServiceImpl implements UsuarioService {
             output.setOnline(vend.getOnline());
             output.setDescricao(vend.getDescricao());
         }
+
+        localizacaoRepository.findById(userEnt.getId()).ifPresent(localizacao -> {
+            output.setLatitude(localizacao.getLatitude());
+            output.setLongitude(localizacao.getLongitude());
+        });
         return output;
     }
 

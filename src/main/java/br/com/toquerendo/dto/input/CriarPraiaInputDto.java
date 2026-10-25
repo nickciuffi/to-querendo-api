@@ -29,13 +29,13 @@ public class CriarPraiaInputDto {
     @Schema(description = "Latitude da praia", example = "-8.1189")
     @DecimalMin(value = "-90", message = "Latitude deve ser maior ou igual a -90")
     @DecimalMax(value = "90", message = "Latitude deve ser menor ou igual a 90")
-    @NotEmpty(message = "Latitude é obrigatória")
+    @NotNull(message = "Latitude é obrigatória")
     private BigDecimal latitude;
 
     @Schema(description = "Longitude da praia", example = "-34.8998")
     @DecimalMin(value = "-180", message = "Longitude deve ser maior ou igual a -180")
     @DecimalMax(value = "180", message = "Longitude deve ser menor ou igual a 180")
-    @NotEmpty(message = "Longitude é obrigatória")
+    @NotNull(message = "Longitude é obrigatória")
     private BigDecimal longitude;
 
     public static Praia toEntity(CriarPraiaInputDto dto) {
