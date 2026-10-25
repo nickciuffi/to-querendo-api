@@ -50,6 +50,8 @@ public class PraiaServiceImpl implements PraiaService {
         praia.setUrlFoto(input.getUrlFoto() != null ? input.getUrlFoto() : praia.getUrlFoto());
         praia.setCidade(input.getCidade() != null ? input.getCidade() : praia.getCidade());
         praia.setEstado(input.getEstado() != null ? input.getEstado() : praia.getEstado());
+        praia.setLatitude(input.getLatitude() != null ? input.getLatitude() : praia.getLatitude());
+        praia.setLongitude(input.getLongitude() != null ? input.getLongitude() : praia.getLongitude());
 
         Praia atualizada = praiaRepository.save(praia);
         return PraiaOutputDto.fromEntity(atualizada);

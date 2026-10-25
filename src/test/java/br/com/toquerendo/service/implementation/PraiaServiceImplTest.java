@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +46,8 @@ class PraiaServiceImplTest {
         praia.setUrlFoto("https://exemplo.com/boa-viagem.jpg");
         praia.setCidade("Recife");
         praia.setEstado("PE");
+        praia.setLatitude(new BigDecimal("-8.1189000"));
+        praia.setLongitude(new BigDecimal("-34.8998000"));
         return praia;
     }
 
@@ -55,6 +58,8 @@ class PraiaServiceImplTest {
         input.setUrlFoto("https://exemplo.com/boa-viagem.jpg");
         input.setCidade("Recife");
         input.setEstado("PE");
+        input.setLatitude(new BigDecimal("-8.1189000"));
+        input.setLongitude(new BigDecimal("-34.8998000"));
 
         Praia praiaSalva = criarPraiaEntity();
         when(praiaRepository.save(any(Praia.class))).thenReturn(praiaSalva);
@@ -67,11 +72,30 @@ class PraiaServiceImplTest {
         assertThat(praiaEnviadaParaSalvar.getNome()).isEqualTo("Praia de Boa Viagem");
         assertThat(praiaEnviadaParaSalvar.getCidade()).isEqualTo("Recife");
         assertThat(praiaEnviadaParaSalvar.getEstado()).isEqualTo("PE");
+        assertThat(praiaEnviadaParaSalvar.getLatitude()).isEqualByComparingTo("-8.1189");
+        assertThat(praiaEnviadaParaSalvar.getLongitude()).isEqualByComparingTo("-34.8998");
 
         assertThat(output.getId()).isEqualTo(1L);
         assertThat(output.getNome()).isEqualTo("Praia de Boa Viagem");
         assertThat(output.getCidade()).isEqualTo("Recife");
         assertThat(output.getEstado()).isEqualTo("PE");
+        assertThat(output.getLatitude()).isEqualByComparingTo("-8.1189");
+        assertThat(output.getLongitude()).isEqualByComparingTo("-34.8998");
+    }
+
+    @Test
+    void criarPraia_semCoordenadas_devePersistirComLatitudeELongitudeNulas() {
+        CriarPraiaInputDto input = new CriarPraiaInputDto();
+        input.setNome("Praia de Boa Viagem");
+        input.setCidade("Recife");
+        input.setEstado("PE");
+
+        when(praiaRepository.save(any(Praia.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        PraiaOutputDto output = praiaService.criarPraia(input);
+
+        assertThat(output.getLatitude()).isNull();
+        assertThat(output.getLongitude()).isNull();
     }
 
     @Test
@@ -82,6 +106,8 @@ class PraiaServiceImplTest {
 
         assertThat(resultado).hasSize(1);
         assertThat(resultado.get(0).getNome()).isEqualTo("Praia de Boa Viagem");
+        assertThat(resultado.get(0).getLatitude()).isEqualByComparingTo("-8.1189");
+        assertThat(resultado.get(0).getLongitude()).isEqualByComparingTo("-34.8998");
     }
 
     @Test
@@ -102,6 +128,8 @@ class PraiaServiceImplTest {
 
         assertThat(output.getId()).isEqualTo(1L);
         assertThat(output.getQtdVendedoresOnline()).isEqualTo(5);
+        assertThat(output.getLatitude()).isEqualByComparingTo("-8.1189");
+        assertThat(output.getLongitude()).isEqualByComparingTo("-34.8998");
     }
 
     @Test
@@ -130,6 +158,25 @@ class PraiaServiceImplTest {
         assertThat(output.getCidade()).isEqualTo("Recife");
         assertThat(output.getEstado()).isEqualTo("PE");
         assertThat(output.getUrlFoto()).isEqualTo("https://exemplo.com/boa-viagem.jpg");
+        assertThat(output.getLatitude()).isEqualByComparingTo("-8.1189");
+        assertThat(output.getLongitude()).isEqualByComparingTo("-34.8998");
+    }
+
+    @Test
+    void atualizarPraia_comCoordenadasInformadas_deveAtualizarLatitudeELongitude() {
+        Praia praiaExistente = criarPraiaEntity();
+        when(praiaRepository.findById(1L)).thenReturn(Optional.of(praiaExistente));
+        when(praiaRepository.save(any(Praia.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AtualizarPraiaInputDto input = new AtualizarPraiaInputDto();
+        input.setLatitude(new BigDecimal("-8.2000000"));
+        input.setLongitude(new BigDecimal("-34.9000000"));
+
+        PraiaOutputDto output = praiaService.atualizarPraia(1L, input);
+
+        assertThat(output.getLatitude()).isEqualByComparingTo("-8.2");
+        assertThat(output.getLongitude()).isEqualByComparingTo("-34.9");
+        assertThat(output.getNome()).isEqualTo("Praia de Boa Viagem");
     }
 
     @Test

@@ -159,7 +159,7 @@ public class PraiaController {
     })
     public ResponseEntity<ApiResponse<PraiaOutputDto>> atualizarPraia(
             @Parameter(description = "Identificador da praia", required = true) @PathVariable Long id,
-            @RequestBody AtualizarPraiaInputDto praia) {
+            @RequestBody @Valid AtualizarPraiaInputDto praia) {
         PraiaOutputDto output = praiaService.atualizarPraia(id, praia);
         return ResponseEntity.ok().body(new ApiResponse<>(output, "Praia atualizada com sucesso!"));
     }

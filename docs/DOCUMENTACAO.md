@@ -217,7 +217,7 @@ praias 1──* usuarios *──1 categorias
 
 ### 5.2 Tabelas (estado após a migration V9)
 
-**`praias`** — `id` BIGSERIAL PK · `nome` NN · `url_foto` (500) · `cidade` NN · `estado` CHAR(2) NN
+**`praias`** — `id` BIGSERIAL PK · `nome` NN · `url_foto` (500) · `cidade` NN · `estado` CHAR(2) NN · `latitude` NUMERIC(10,7) · `longitude` NUMERIC(10,7) (as duas últimas anuláveis)
 
 **`categorias`** — `id` · `descricao` NN. Seed: `1 turista`, `2 vendedor`, `3 administrador`.
 
@@ -264,10 +264,11 @@ Todas usam Lombok `@Data` (equals/hashCode sobre todos os campos — **não use 
 | V8 | `V8__ajustar_on_delete_praia_e_produto_base.sql` | `usuarios.id_praia` → SET NULL; `produtos_especificos` e `intencoes_compra` → CASCADE ao apagar produto base. |
 | V9 | `V9__add_motivo_conclusao_intencao_compra.sql` | `intencoes_compra.motivo_conclusao VARCHAR(200)`. |
 | V10 | `V10__seed_vendedores_admin.sql` | Cria um registro em `vendedores` (`online=false`, sem descrição) para cada usuário administrador (categoria 3) que ainda não tem um; idempotente via `NOT EXISTS`. A categoria continua administrador. Efeito: admins passam a poder usar os endpoints de vendedor (`buscarVendedorLogado` encontra o registro). Os admins do seed não têm telefone/CPF — a migration ignora a regra de `POST /vendedor`, que exigiria os dois. |
+| V11 | `V11__add_latitude_longitude_praias.sql` | `praias.latitude` e `praias.longitude` `NUMERIC(10,7)`, **anuláveis** (mesmo tipo de `localizacoes`). Mapeados em `Praia` e nos DTOs de criar/atualizar/saída de praia. |
 
 ### 5.5 Como criar uma migration (importante)
 
-1. Crie `src/main/java/br/com/toquerendo/db/migration/V<próximo>__descricao_em_snake_case.sql` (próximo = maior versão + 1; hoje, **V11**).
+1. Crie `src/main/java/br/com/toquerendo/db/migration/V<próximo>__descricao_em_snake_case.sql` (próximo = maior versão + 1; hoje, **V12**).
 2. **Nunca edite** uma migration já aplicada — crie uma nova.
 3. O `pom.xml` copia `**/*.sql` de `src/main/java` para o classpath (bloco `<resources>`); é por isso que as migrations vivem ali e Flyway as encontra em `classpath:br/com/toquerendo/db/migration`.
 4. Colunas novas em tabelas existentes: pense em `NOT NULL` + `DEFAULT` (ou nulo) para não quebrar linhas antigas.
@@ -385,7 +386,8 @@ Tudo restrito a vendedor e **sempre sobre os produtos do vendedor logado**.
 
 - Leitura (lista e por id): qualquer autenticado. Escrita (criar/atualizar/remover): **admin**.
 - `GET /praia/{id}` inclui `qtdVendedoresOnline` (vendedores `online=true` cujo usuário está na praia); a lista **não** inclui essa contagem.
-- Criar: `nome`, `cidade`, `estado` (2 letras) obrigatórios. Atualizar: parcial.
+- Criar: `nome`, `cidade`, `estado` (2 letras) obrigatórios; `latitude`/`longitude` **opcionais** (−90…90 e −180…180 quando informadas). Atualizar: parcial (campo nulo preserva; não é possível "limpar" as coordenadas pela API).
+- As coordenadas saem em toda `PraiaOutputDto` (lista, por id, criação, edição) — inclusive em `praiaAtual` dentro de `UsuarioOutputDto` — e são omitidas do JSON quando nulas.
 - Remover: delete físico; usuários da praia ficam com `id_praia = NULL` (V8).
 
 ### 7.6 Localização (`LocalizacaoServiceImpl`)
@@ -506,8 +508,8 @@ Atenção: `RuntimeException` crua (ex.: `new RuntimeException("Usuário não en
 | `CadastroUsuarioRequestDto` | `email` (`@NotBlank @Email`), `nome` (`@NotBlank`), `senha` (`@NotBlank`, `@Size(min=6)`), `telefone`, `cpf` (`@Pattern \d{11}`), `idPraia` |
 | `AtualizarUsuarioRequestDto` | `nome`, `telefone`, `cpf` (`@Pattern \d{11}`), `urlFoto`, `idPraia`, `descricao`*, `online`* (*só afetam vendedor*) |
 | `CriarVendedorRequestDto` | `descricao` (`@Size(max=500)`) |
-| `CriarPraiaInputDto` | `nome`, `cidade` (`@NotNull`), `estado` (`@NotNull @Size(2,2)`), `urlFoto` |
-| `AtualizarPraiaInputDto` | todos opcionais; `estado` `@Size(2,2)` |
+| `CriarPraiaInputDto` | `nome`, `cidade` (`@NotNull`), `estado` (`@NotNull @Size(2,2)`), `urlFoto`, `latitude` (opc., −90…90), `longitude` (opc., −180…180) |
+| `AtualizarPraiaInputDto` | todos opcionais (`nome`, `urlFoto`, `cidade`, `estado` `@Size(2,2)`, `latitude`, `longitude` com a mesma faixa) |
 | `CriarProdutoBaseInputDto` | `nome`, `descricao`, `precoMinimo` (`@NotNull`), `urlFoto` |
 | `AtualizarProdutoBaseInputDto` | todos opcionais (`nome`, `descricao`, `urlFoto`, `precoMinimo`, `estaAtivo`) |
 | `CriarProdutoEspecificoInputDto` | `nome`, `idProdutoBase`, `preco` (`@NotNull`), `descricao`, `urlFoto` |
@@ -516,7 +518,7 @@ Atenção: `RuntimeException` crua (ex.: `new RuntimeException("Usuário não en
 | `CriarIntencaoCompraInputDto` | `idProdutoBase`, `descricaoLocal` (`@NotNull`), `observacoes`, `urlFotoLocal` |
 | `ConcluirIntencaoCompraInputDto` | `idProdutoBase` (`@NotNull`), `motivo` (`@NotBlank`, `@Size(max=200)`) |
 
-Padrão de **atualização**: DTOs "Atualizar*" não têm `@NotNull`; o serviço aplica `campo != null ? novo : atual`. Observação: nos controllers de atualização de praia/produto base/produto específico o `@RequestBody` **não** leva `@Valid` (a regra `@Size` de `estado` em `AtualizarPraiaInputDto`, por exemplo, não é aplicada).
+Padrão de **atualização**: DTOs "Atualizar*" não têm `@NotNull`; o serviço aplica `campo != null ? novo : atual`. Observação: nos controllers de atualização de produto base/produto específico o `@RequestBody` **não** leva `@Valid` (só `PUT /praia/{id}` valida o corpo: `estado` com 2 letras e faixa de latitude/longitude).
 
 ### 10.2 Saída (`dto/output`)
 
@@ -524,7 +526,7 @@ Padrão de **atualização**: DTOs "Atualizar*" não têm `@NotNull`; o serviço
 |---|---|
 | `LoginResponseDto` | `token`, `tipo`, `expiraEmMs` |
 | `UsuarioOutputDto` | `email`, `nome`, `cpf`, `telefone`, `urlFoto` (nulos viram `""`), `praiaAtual` (`PraiaOutputDto`, sempre presente), `categoria` (`CategoriaOutputDto`, sempre presente), e — só quando aplicável — `token`, `descricao`, `online` |
-| `PraiaOutputDto` | `id`, `nome`, `urlFoto`, `cidade`, `estado`, `qtdVendedoresOnline` (só em `GET /praia/{id}`) |
+| `PraiaOutputDto` | `id`, `nome`, `urlFoto`, `cidade`, `estado`, `latitude`, `longitude` (nulos omitidos), `qtdVendedoresOnline` (só em `GET /praia/{id}`) |
 | `CategoriaOutputDto` | `id`, `descricao` |
 | `ProdutoBaseOutputDto` | `id`, `nome`, `descricao`, `urlFoto`, `precoMinimo` (String), `estaAtivo` |
 | `ProdutoEspecificoOutputDto` | `id`, `nome`, `descricao`, `urlFoto`, `idProdutoBase`, `nomeProdutoBase`, `idVendedor`, `preco`, `produtoAtivo`, `produtoBaseAtivo`, `tsCriacaoProduto` (String `dd/MM/yyyy HH:mm`) |

@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -26,6 +28,12 @@ public class PraiaOutputDto {
     @Schema(description = "Sigla do estado onde a praia está localizada", example = "PE")
     private String estado;
 
+    @Schema(description = "Latitude da praia", example = "-8.1189")
+    private BigDecimal latitude;
+
+    @Schema(description = "Longitude da praia", example = "-34.8998")
+    private BigDecimal longitude;
+
     @Schema(description = "Quantidade de vendedores online na praia", example = "5")
     private Integer qtdVendedoresOnline;
 
@@ -39,6 +47,8 @@ public class PraiaOutputDto {
                 .urlFoto(praia.getUrlFoto())
                 .cidade(praia.getCidade())
                 .estado(praia.getEstado())
+                .latitude(praia.getLatitude())
+                .longitude(praia.getLongitude())
                 .build();
     }
 }
