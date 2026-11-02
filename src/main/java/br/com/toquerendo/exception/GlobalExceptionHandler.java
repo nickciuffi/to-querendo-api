@@ -4,10 +4,14 @@ import br.com.toquerendo.dto.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -92,6 +96,36 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(VendedorJaCadastradoException.class)
     public ResponseEntity<ApiResponse<Object>> handleVendedorJaCadastradoException(VendedorJaCadastradoException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(PastaArquivoNaoPermitidaException.class)
+    public ResponseEntity<ApiResponse<Object>> handlePastaArquivoNaoPermitidaException(PastaArquivoNaoPermitidaException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(UploadArquivoException.class)
+    public ResponseEntity<ApiResponse<Object>> handleUploadArquivoException(UploadArquivoException e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage()));
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(new ApiResponse<>("O arquivo excede o tamanho máximo permitido de 5 MB."));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+        return ResponseEntity.badRequest().body(new ApiResponse<>("Parte obrigatória ausente: " + e.getRequestPartName()));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(new ApiResponse<>("Tipo de conteúdo não suportado: " + e.getContentType()));
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ApiResponse<Object>> handleMultipartException(MultipartException e) {
+        return ResponseEntity.badRequest().body(new ApiResponse<>("A requisição deve ser enviada como multipart/form-data."));
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
