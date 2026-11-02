@@ -15,7 +15,7 @@ public interface IntencaoCompraRepository extends JpaRepository<IntencaoCompra, 
             "where u.categoria.id = :idCategoriaTurista " +
             "and u.praia.id = :idPraia " +
             "and ic.produtoBase.id in :idsProdutoBase " +
-            "and ic.estaAtivo = true" +
+            "and ic.estaAtivo = true " +
             "order by ic.tsCriacaoIntencao desc"
     )
     List<IntencaoCompra> findAllAtivasDeTuristasPorPraiaEProdutosBase(
