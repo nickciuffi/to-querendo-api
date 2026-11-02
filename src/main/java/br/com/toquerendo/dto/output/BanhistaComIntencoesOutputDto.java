@@ -20,6 +20,8 @@ public class BanhistaComIntencoesOutputDto {
     @Schema(description = "Nome do usuário banhista", example = "Maria Turista")
     private String nomeUsuario;
 
+    private String urlFotoPerfil;
+
     @Schema(description = "Intenções de compra do banhista compatíveis com os produtos ativos do vendedor logado")
     private List<IntencaoCompraOutputDto> intencoesCompra;
 
@@ -27,6 +29,7 @@ public class BanhistaComIntencoesOutputDto {
         return BanhistaComIntencoesOutputDto.builder()
                 .idUsuario(usuario.getId())
                 .nomeUsuario(usuario.getNome())
+                .urlFotoPerfil(usuario.getUrlFoto())
                 .intencoesCompra(intencoesCompra.stream()
                         .map(IntencaoCompraOutputDto::fromEntity)
                         .toList())
