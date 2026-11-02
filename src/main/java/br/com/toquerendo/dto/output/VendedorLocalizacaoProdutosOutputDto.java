@@ -23,6 +23,9 @@ public class VendedorLocalizacaoProdutosOutputDto {
     @Schema(description = "Nome do vendedor", example = "João da Praia")
     private String nomeVendedor;
 
+    @Schema(description = "URL da foto de perfil do vendedor", example = "https://exemplo.com/perfil.jpg")
+    private String urlFotoPerfil;
+
     private List<ProdutoEspecificoOutputDto> produtos;
 
     @Schema(description = "Latitude atual do vendedor", example = "-23.5614750")
@@ -35,6 +38,7 @@ public class VendedorLocalizacaoProdutosOutputDto {
         return VendedorLocalizacaoProdutosOutputDto.builder()
                 .idVendedor(vendedor.getId())
                 .nomeVendedor(vendedor.getUsuario().getNome())
+                .urlFotoPerfil(vendedor.getUsuario().getUrlFoto())
                 .latitude(localizacao != null ? localizacao.getLatitude() : new BigDecimal("0"))
                 .longitude(localizacao != null ? localizacao.getLongitude() : new BigDecimal("0"))
                 .produtos(produtos.stream().map(ProdutoEspecificoOutputDto::fromEntity).collect(Collectors.toList()))
