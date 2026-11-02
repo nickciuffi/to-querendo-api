@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 
 @Data
 @Builder
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProdutoEspecificoOutputDto {
 
     private static final DateTimeFormatter FORMATO_TS_CRIACAO = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
